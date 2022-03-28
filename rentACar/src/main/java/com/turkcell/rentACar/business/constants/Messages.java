@@ -75,7 +75,8 @@ public class Messages {
 	public static final String CREDITCARDSLISTED = "CreditCards Listed";
 	public static final String CREDITCARDGETTEDBYID = "CreditCard getted by Id";
 	public static final String CREDITCARDGETTEDBYCREDITCARDNUMBER = "CreditCard getted by CreditCardNumber";
-	public static final String CREDITCARDNOTFOUND = "This CreditCard Id is undefined!";
+	public static final String CREDITCARDNOTFOUND = "This CreditCard is undefined!";
+	public static final String CREDITCARDISEXISTS = "This CreditCard is already exists!";
 	
 	public static final String INDIVIDUALCUSTOMERADDED = "IndividualCustomer Added: ";
 	public static final String INDIVIDUALCUSTOMERUPDATED = "IndividualCustomer Updated: ";

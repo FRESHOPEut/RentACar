@@ -55,7 +55,7 @@ public class CreditCardManager implements CreditCardService{
 	@Override
 	public Result create(CreateCreditCardRequest createCreditCardRequest) {
 		
-		checkCreditCardNumber(createCreditCardRequest.getCreditCardNumber());
+		checkCreditCardNumberExists(createCreditCardRequest.getCreditCardNumber());
 		
 		CreditCard creditCard = this.modelMapperService.forRequest()
 			.map(createCreditCardRequest, CreditCard.class);
@@ -150,6 +150,14 @@ public class CreditCardManager implements CreditCardService{
 		if(!this.creditCardDao.existsByCreditCardNumber(creditCardNumber)) {
 			
 			throw new BusinessException(Messages.CREDITCARDNOTFOUND);
+		}
+	}
+	
+	private void checkCreditCardNumberExists(String creditCardNumber) {
+		
+		if(this.creditCardDao.existsByCreditCardNumber(creditCardNumber)) {
+			
+			throw new BusinessException(Messages.CREDITCARDISEXISTS);
 		}
 	}
 }
