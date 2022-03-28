@@ -55,6 +55,8 @@ public class PaymentManager implements PaymentService{
 		
 		Payment payment = this.modelMapperService.forRequest().map(updatePaymentRequest, Payment.class);
 		
+		checkCustomerCanUseCreditCard(payment);
+		
 		checkPaymentMethodIsValid(payment.getPaymentCard());
 		
 		this.paymentDao.save(payment);
@@ -176,6 +178,14 @@ public class PaymentManager implements PaymentService{
 		if(!this.creditCardService.getById(creditCardId).isSuccess()) {
 			
 			throw new BusinessException(Messages.CREDITCARDNOTFOUND);
+		}
+	}
+	
+	private void checkCustomerCanUseCreditCard(Payment payment) {
+		
+		if(payment.getPaymentCard().getCreditCardCustomer().getUserId() != payment.getPaymentRental().getRentalCustomer().getUserId()) {
+			
+			throw new BusinessException(Messages.CUSTOMERANDCARDDOESNOTMATCH);
 		}
 	}
 }

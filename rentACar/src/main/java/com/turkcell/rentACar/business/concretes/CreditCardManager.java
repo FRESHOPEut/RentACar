@@ -11,6 +11,7 @@ import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
 
 import com.turkcell.rentACar.business.abstracts.CreditCardService;
+import com.turkcell.rentACar.business.abstracts.CustomerService;
 import com.turkcell.rentACar.business.constants.Messages;
 import com.turkcell.rentACar.business.dtos.creditCard.CreditCardDto;
 import com.turkcell.rentACar.business.dtos.creditCard.ListCreditCardDto;
@@ -30,12 +31,14 @@ public class CreditCardManager implements CreditCardService{
 	
 	private CreditCardDao creditCardDao;
 	private ModelMapperService modelMapperService;
+	private CustomerService customerService;
 	
 	@Autowired
-	public CreditCardManager(CreditCardDao creditCardDao, ModelMapperService modelMapperService) {
+	public CreditCardManager(CreditCardDao creditCardDao, ModelMapperService modelMapperService, CustomerService customerService) {
 
 		this.creditCardDao = creditCardDao;
 		this.modelMapperService = modelMapperService;
+		this.customerService = customerService;
 	}
 
 	@Override
@@ -43,6 +46,7 @@ public class CreditCardManager implements CreditCardService{
 		
 		checkCreditCardId(updateCreditCardRequest.getCreditCardId());
 		checkCreditCardNumber(updateCreditCardRequest.getCreditCardNumber());
+		this.customerService.checkCustomerExists(updateCreditCardRequest.getCustomerId());
 		
 		CreditCard creditCard = this.modelMapperService.forRequest()
 			.map(updateCreditCardRequest, CreditCard.class);
@@ -56,6 +60,7 @@ public class CreditCardManager implements CreditCardService{
 	public Result create(CreateCreditCardRequest createCreditCardRequest) {
 		
 		checkCreditCardNumberExists(createCreditCardRequest.getCreditCardNumber());
+		this.customerService.checkCustomerExists(createCreditCardRequest.getCustomerId());
 		
 		CreditCard creditCard = this.modelMapperService.forRequest()
 			.map(createCreditCardRequest, CreditCard.class);

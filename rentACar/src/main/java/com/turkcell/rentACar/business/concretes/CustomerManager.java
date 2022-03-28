@@ -32,6 +32,16 @@ public class CustomerManager implements CustomerService{
 		return customer;
 	}
 	
+	@Override
+	public void checkCustomerExists(int customerId) {
+		
+		if(this.customerDao.existsById(customerId)) {
+			
+			throw new BusinessException(Messages.CUSTOMERNOTFOUND);
+		}
+	}
+	
+	@Override
 	public void checkEmailExists(String email) {
 		
 		if(this.customerDao.existsByEmail(email)) {

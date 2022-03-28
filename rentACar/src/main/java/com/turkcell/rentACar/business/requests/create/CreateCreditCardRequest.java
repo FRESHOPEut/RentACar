@@ -13,6 +13,9 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class CreateCreditCardRequest {
+	
+	@NotNull
+	private int customerId;
 
 	@NotNull
 	@Size(min = 16, max = 16)

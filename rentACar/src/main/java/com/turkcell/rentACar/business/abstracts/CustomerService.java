@@ -6,5 +6,7 @@ public interface CustomerService {
 	
 	Customer setByCustomerId(int customerId);
 	
+	void checkCustomerExists(int customerId);
+	
 	void checkEmailExists(String email);
 }
