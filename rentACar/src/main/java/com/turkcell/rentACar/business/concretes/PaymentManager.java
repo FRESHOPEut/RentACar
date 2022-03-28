@@ -17,6 +17,7 @@ import com.turkcell.rentACar.business.dtos.payment.ListPaymentDto;
 import com.turkcell.rentACar.business.dtos.payment.PaymentDto;
 import com.turkcell.rentACar.business.requests.create.CreateCreditCardRequest;
 import com.turkcell.rentACar.business.requests.create.CreatePaymentRequest;
+import com.turkcell.rentACar.business.requests.create.CreatePaymentWithSavedCardRequest;
 import com.turkcell.rentACar.business.requests.update.UpdatePaymentRequest;
 import com.turkcell.rentACar.core.exceptions.BusinessException;
 import com.turkcell.rentACar.core.utilities.mapping.abstracts.ModelMapperService;
@@ -74,6 +75,18 @@ public class PaymentManager implements PaymentService{
 		this.paymentDao.save(payment);
 		
 		return new SuccessDataResult<CreatePaymentRequest>(createPaymentRequest, Messages.PAYMENTADDED);
+	}
+	
+	@Override
+	public Result createWithSavedCard(CreatePaymentWithSavedCardRequest createPaymentWithSavedCardRequest) {
+		
+		checkCreditCardExists(createPaymentWithSavedCardRequest.getCreditCardId());
+		
+		Payment payment = this.modelMapperService.forRequest().map(createPaymentWithSavedCardRequest, Payment.class);
+		
+		this.paymentDao.save(payment);
+		
+		return new SuccessDataResult<CreatePaymentWithSavedCardRequest>(createPaymentWithSavedCardRequest, Messages.PAYMENTADDED);
 	}
 
 	@Override
@@ -155,6 +168,14 @@ public class PaymentManager implements PaymentService{
 		if(saveCard) {
 			
 			this.creditCardService.create(createCreditCardRequest);
+		}
+	}
+	
+	private void checkCreditCardExists(int creditCardId) {
+		
+		if(!this.creditCardService.getById(creditCardId).isSuccess()) {
+			
+			throw new BusinessException(Messages.CREDITCARDNOTFOUND);
 		}
 	}
 }

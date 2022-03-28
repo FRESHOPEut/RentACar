@@ -17,6 +17,7 @@ import com.turkcell.rentACar.business.abstracts.PaymentService;
 import com.turkcell.rentACar.business.dtos.payment.ListPaymentDto;
 import com.turkcell.rentACar.business.dtos.payment.PaymentDto;
 import com.turkcell.rentACar.business.requests.create.CreatePaymentRequest;
+import com.turkcell.rentACar.business.requests.create.CreatePaymentWithSavedCardRequest;
 import com.turkcell.rentACar.business.requests.update.UpdatePaymentRequest;
 import com.turkcell.rentACar.core.utilities.results.DataResult;
 import com.turkcell.rentACar.core.utilities.results.Result;
@@ -42,6 +43,12 @@ public class PaymentsController {
 	public Result create(@RequestBody @Valid CreatePaymentRequest createPaymentRequest, boolean saveCard) {
 		
 		return this.paymentService.create(createPaymentRequest, saveCard);
+	}
+	
+	@PostMapping("/createWithSavedCard")
+	public Result createWithSavedCard(CreatePaymentWithSavedCardRequest createPaymentWithSavedCardRequest) {
+		
+		return this.paymentService.createWithSavedCard(createPaymentWithSavedCardRequest);
 	}
 	
 	@GetMapping("/listAll")
