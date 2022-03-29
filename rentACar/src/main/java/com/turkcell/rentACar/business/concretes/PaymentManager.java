@@ -54,7 +54,7 @@ public class PaymentManager implements PaymentService{
 	@Override
 	public Result update(UpdatePaymentRequest updatePaymentRequest) {
 		
-		checkPaymentId(updatePaymentRequest.getPaymentId());
+		checkPaymentIdExists(updatePaymentRequest.getPaymentId());
 		isRentalExists(updatePaymentRequest.getRentalId());
 		
 		Payment payment = this.modelMapperService.forRequest().map(updatePaymentRequest, Payment.class);
@@ -108,7 +108,7 @@ public class PaymentManager implements PaymentService{
 	@Override
 	public DataResult<PaymentDto> getByPaymentId(int paymentId) {
 		
-		checkPaymentId(paymentId);
+		checkPaymentIdExists(paymentId);
 		
 		Payment payment = this.paymentDao.getByPaymentId(paymentId);
 		PaymentDto paymentDto = this.modelMapperService.forDto().map(payment, PaymentDto.class);
@@ -145,14 +145,14 @@ public class PaymentManager implements PaymentService{
 	@Override
 	public Result delete(int paymentId) {
 		
-		checkPaymentId(paymentId);
+		checkPaymentIdExists(paymentId);
 		
 		this.paymentDao.deleteById(paymentId);
 		
 		return new SuccessResult(Messages.PAYMENTDELETED);
 	}
 	
-	private void checkPaymentId(int paymentId) {
+	private void checkPaymentIdExists(int paymentId) {
 		
 		if(!this.paymentDao.existsByPaymentId(paymentId)) {
 			

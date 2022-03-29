@@ -43,7 +43,7 @@ public class AdditionalServiceManager implements AdditionalServiceService {
 	@Override
 	public Result update(UpdateAdditionalServiceRequest updateAdditionalServiceRequest){
 		
-		checkAdditionalServiceId(updateAdditionalServiceRequest.getAdditionalServiceId());
+		checkAdditionalServiceIdExists(updateAdditionalServiceRequest.getAdditionalServiceId());
 		
 		AdditionalService additionalService = this.modelMapperService.forRequest()
 			.map(updateAdditionalServiceRequest, AdditionalService.class);
@@ -57,7 +57,7 @@ public class AdditionalServiceManager implements AdditionalServiceService {
 	@Transactional
 	public Result create(CreateAdditionalServiceRequest createAdditionalServiceRequest){
 		
-		checkAdditionalServiceName(createAdditionalServiceRequest.getAdditionalServiceName());
+		checkAdditionalServiceNameExists(createAdditionalServiceRequest.getAdditionalServiceName());
 		
 		AdditionalService additionalService = this.modelMapperService.forRequest()
 			.map(createAdditionalServiceRequest, AdditionalService.class);
@@ -83,7 +83,7 @@ public class AdditionalServiceManager implements AdditionalServiceService {
 	@Override
 	public DataResult<AdditionalServiceDto> getById(int additionalServiceId){
 		
-		checkAdditionalServiceId(additionalServiceId);
+		checkAdditionalServiceIdExists(additionalServiceId);
 		
 		AdditionalService additionalService = this.additionalServiceDao.getById(additionalServiceId);
 		AdditionalServiceDto additionalServiceDto = this.modelMapperService.forDto()
@@ -125,7 +125,7 @@ public class AdditionalServiceManager implements AdditionalServiceService {
 	@Override
 	public Result delete(int additionalServiceId){
 		
-		checkAdditionalServiceId(additionalServiceId);
+		checkAdditionalServiceIdExists(additionalServiceId);
 	
 		String additionalServiceNameBefore = this.additionalServiceDao
 			.findByAdditionalServiceId(additionalServiceId).getAdditionalServiceName();
@@ -143,7 +143,7 @@ public class AdditionalServiceManager implements AdditionalServiceService {
 		return additionalServices;
 	}
 
-	private void checkAdditionalServiceName(String additionalServiceName){
+	private void checkAdditionalServiceNameExists(String additionalServiceName){
 		
 		if (this.additionalServiceDao.existsByAdditionalServiceName(additionalServiceName)) {
 			
@@ -151,7 +151,7 @@ public class AdditionalServiceManager implements AdditionalServiceService {
 		}
 	}
 
-	private void checkAdditionalServiceId(int additionalServiceId){
+	private void checkAdditionalServiceIdExists(int additionalServiceId){
 		
 		if (!this.additionalServiceDao.existsById(additionalServiceId)) {
 			

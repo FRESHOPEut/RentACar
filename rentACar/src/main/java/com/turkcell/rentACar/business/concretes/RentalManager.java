@@ -59,10 +59,10 @@ public class RentalManager implements RentalService {
 	@Override
 	public Result update(UpdateRentalRequest updateRentalRequest){
 		
-		checkRentalId(updateRentalRequest.getRentalId());
+		checkRentalIdExists(updateRentalRequest.getRentalId());
 		this.carMaintenanceService.checkCarAlreadyMaintenanced(updateRentalRequest.getCarId());
 		checkCarAlreadyRented(updateRentalRequest.getCarId());
-		checkCarId(updateRentalRequest.getCarId());
+		checkCarIdExists(updateRentalRequest.getCarId());
 		
 		Rental rental = this.modelMapperService.forRequest().map(updateRentalRequest, Rental.class);
 		calculateTotalDailyPrice(rental.getRentalId());
@@ -82,7 +82,7 @@ public class RentalManager implements RentalService {
 		
 		this.carMaintenanceService.checkCarAlreadyMaintenanced(createRentalRequest.getCarId());
 		checkCarAlreadyRented(createRentalRequest.getCarId());
-		checkCarId(createRentalRequest.getCarId());
+		checkCarIdExists(createRentalRequest.getCarId());
 		
 		Rental rental = this.modelMapperService.forRequest().map(createRentalRequest, Rental.class);
 		CarDto carDto = this.carService.getById(createRentalRequest.getCarId()).getData();
@@ -113,7 +113,7 @@ public class RentalManager implements RentalService {
 	@Override
 	public DataResult<RentalDto> getById(int rentalId){
 		
-		checkRentalId(rentalId);
+		checkRentalIdExists(rentalId);
 		
 		Rental rental = this.rentalDao.getById(rentalId);
 		RentalDto rentalDto = this.modelMapperService.forDto().map(rental, RentalDto.class);
@@ -137,7 +137,7 @@ public class RentalManager implements RentalService {
 	@Override
 	public Result delete(int rentalId){
 		
-		checkRentalId(rentalId);
+		checkRentalIdExists(rentalId);
 		
 		int rentalIdBeforeDelete = rentalId;
 		this.rentalDao.deleteById(rentalId);
@@ -162,7 +162,7 @@ public class RentalManager implements RentalService {
 		}
 	}
 
-	private void checkRentalId(int rentalId){
+	private void checkRentalIdExists(int rentalId){
 		
 		if (!this.rentalDao.existsById(rentalId)) {
 			
@@ -170,7 +170,7 @@ public class RentalManager implements RentalService {
 		}
 	}
 
-	private void checkCarId(int carId){
+	private void checkCarIdExists(int carId){
 		
 		if (!this.carService.getById(carId).isSuccess()) {
 			
@@ -185,14 +185,14 @@ public class RentalManager implements RentalService {
 		List<AdditionalService> additionalServices = this.additionalServiceService
 			.getByRentalId(rentalId); 
 		
-		double total = this.carService.getById(rental.getRentalCar().getCarId()).getData().getDailyPrice();
+		double totalDailyPrice = this.carService.getById(rental.getRentalCar().getCarId()).getData().getDailyPrice();
 		
 		for (AdditionalService additionalService : additionalServices) {
 			
-			total += additionalService.getAdditionalServiceDailyPrice();
+			totalDailyPrice += additionalService.getAdditionalServiceDailyPrice();
 		}
 		
-		return total;
+		return totalDailyPrice;
 	}
 	
 	private void updateCarKilometer(UpdateRentalRequest updateRentalRequest) {

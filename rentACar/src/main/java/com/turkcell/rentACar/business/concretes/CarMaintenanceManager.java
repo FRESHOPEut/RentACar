@@ -49,10 +49,10 @@ public class CarMaintenanceManager implements CarMaintenanceService {
 	@Override
 	public Result update(UpdateCarMaintenanceRequest updateCarMaintenanceRequest){
 		
-		checkCarMaintenanceId(updateCarMaintenanceRequest.getCarMaintenanceId());
+		checkCarMaintenanceIdExists(updateCarMaintenanceRequest.getCarMaintenanceId());
 		this.rentalService.checkCarAlreadyRented(updateCarMaintenanceRequest.getCarId());
 		checkCarAlreadyMaintenanced(updateCarMaintenanceRequest.getCarId());
-		checkCarId(updateCarMaintenanceRequest.getCarId());
+		checkCarIdExists(updateCarMaintenanceRequest.getCarId());
 		
 		CarMaintenance carMaintenance = this.modelMapperService.forRequest()
 			.map(updateCarMaintenanceRequest, CarMaintenance.class);
@@ -70,7 +70,7 @@ public class CarMaintenanceManager implements CarMaintenanceService {
 		
 		this.rentalService.checkCarAlreadyRented(createCarMaintenanceRequest.getCarId());
 		checkCarAlreadyMaintenanced(createCarMaintenanceRequest.getCarId());
-		checkCarId(createCarMaintenanceRequest.getCarId());
+		checkCarIdExists(createCarMaintenanceRequest.getCarId());
 		
 		CarMaintenance carMaintenance = this.modelMapperService.forRequest()
 			.map(createCarMaintenanceRequest, CarMaintenance.class);
@@ -96,7 +96,7 @@ public class CarMaintenanceManager implements CarMaintenanceService {
 	@Override
 	public DataResult<CarMaintenanceDto> getById(int carMaintenanceId){
 		
-		checkCarMaintenanceId(carMaintenanceId);
+		checkCarMaintenanceIdExists(carMaintenanceId);
 		
 		CarMaintenance carMaintenance = this.carMaintenanceDao.getById(carMaintenanceId);
 		CarMaintenanceDto carMaintenanceDto = this.modelMapperService.forDto()
@@ -122,7 +122,7 @@ public class CarMaintenanceManager implements CarMaintenanceService {
 	@Override
 	public DataResult<List<ListCarMaintenanceDto>> getByCarId(int carId){
 		
-		checkCarId(carId);
+		checkCarIdExists(carId);
 		
 		List<CarMaintenance> carMaintenances = this.carMaintenanceDao
 			.getCarMaintenanceByCarMaintenanceCar_CarId(carId);
@@ -137,7 +137,7 @@ public class CarMaintenanceManager implements CarMaintenanceService {
 	@Override
 	public Result delete(int carMaintenanceId){
 		
-		checkCarMaintenanceId(carMaintenanceId);
+		checkCarMaintenanceIdExists(carMaintenanceId);
 		
 		String descriptionBeforeDelete = this.carMaintenanceDao.findByCarMaintenanceId(carMaintenanceId)
 				.getCarMaintenanceDescription();
@@ -146,7 +146,7 @@ public class CarMaintenanceManager implements CarMaintenanceService {
 		return new SuccessResult(Messages.CARMAINTENANCEDELETED + descriptionBeforeDelete);
 	}
 
-	private void checkCarMaintenanceId(int carMaintenanceId){
+	private void checkCarMaintenanceIdExists(int carMaintenanceId){
 		
 		if (!this.carMaintenanceDao.existsById(carMaintenanceId)) {
 			
@@ -154,7 +154,7 @@ public class CarMaintenanceManager implements CarMaintenanceService {
 		}
 	}
 
-	private void checkCarId(int carId){
+	private void checkCarIdExists(int carId){
 		
 		if (!this.carService.getById(carId).isSuccess()) {
 			

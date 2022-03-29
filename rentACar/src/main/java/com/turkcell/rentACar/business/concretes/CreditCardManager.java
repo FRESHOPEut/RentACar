@@ -44,8 +44,8 @@ public class CreditCardManager implements CreditCardService{
 	@Override
 	public Result update(UpdateCreditCardRequest updateCreditCardRequest) {
 		
-		checkCreditCardId(updateCreditCardRequest.getCreditCardId());
-		checkCreditCardNumber(updateCreditCardRequest.getCreditCardNumber());
+		checkCreditCardIdExists(updateCreditCardRequest.getCreditCardId());
+		checkCreditCardNumberExists(updateCreditCardRequest.getCreditCardNumber());
 		this.customerService.checkCustomerExists(updateCreditCardRequest.getCustomerId());
 		
 		CreditCard creditCard = this.modelMapperService.forRequest()
@@ -59,7 +59,7 @@ public class CreditCardManager implements CreditCardService{
 	@Override
 	public Result create(CreateCreditCardRequest createCreditCardRequest) {
 		
-		checkCreditCardNumberExists(createCreditCardRequest.getCreditCardNumber());
+		checkCreditCardNumberAlreadyExists(createCreditCardRequest.getCreditCardNumber());
 		this.customerService.checkCustomerExists(createCreditCardRequest.getCustomerId());
 		
 		CreditCard creditCard = this.modelMapperService.forRequest()
@@ -85,7 +85,7 @@ public class CreditCardManager implements CreditCardService{
 	@Override
 	public DataResult<CreditCardDto> getById(int creditCardId) {
 		
-		checkCreditCardId(creditCardId);
+		checkCreditCardIdExists(creditCardId);
 		
 		CreditCard creditCard = this.creditCardDao.getByCreditCardId(creditCardId);
 		CreditCardDto creditCardDto = this.modelMapperService.forDto().map(creditCard, CreditCardDto.class);
@@ -96,7 +96,7 @@ public class CreditCardManager implements CreditCardService{
 	@Override
 	public DataResult<CreditCardDto> getByCreditCardNumber(String creditCardNumber) {
 		
-		checkCreditCardNumber(creditCardNumber);
+		checkCreditCardNumberExists(creditCardNumber);
 		
 		CreditCard creditCard = this.creditCardDao.getByCreditCardNumber(creditCardNumber);
 		CreditCardDto creditCardDto = this.modelMapperService.forDto().map(creditCard, CreditCardDto.class);
@@ -135,14 +135,14 @@ public class CreditCardManager implements CreditCardService{
 	@Override
 	public Result delete(int creditCardId) {
 		
-		checkCreditCardId(creditCardId);
+		checkCreditCardIdExists(creditCardId);
 		
 		this.creditCardDao.deleteById(creditCardId);
 		
 		return new SuccessResult(Messages.CREDITCARDDELETED);
 	}
 	
-	private void checkCreditCardId(int creditCardId) {
+	private void checkCreditCardIdExists(int creditCardId) {
 		
 		if(!this.creditCardDao.existsById(creditCardId)) {
 			
@@ -150,7 +150,7 @@ public class CreditCardManager implements CreditCardService{
 		}
 	}
 	
-	private void checkCreditCardNumber(String creditCardNumber) {
+	private void checkCreditCardNumberExists(String creditCardNumber) {
 		
 		if(!this.creditCardDao.existsByCreditCardNumber(creditCardNumber)) {
 			
@@ -158,7 +158,7 @@ public class CreditCardManager implements CreditCardService{
 		}
 	}
 	
-	private void checkCreditCardNumberExists(String creditCardNumber) {
+	private void checkCreditCardNumberAlreadyExists(String creditCardNumber) {
 		
 		if(this.creditCardDao.existsByCreditCardNumber(creditCardNumber)) {
 			

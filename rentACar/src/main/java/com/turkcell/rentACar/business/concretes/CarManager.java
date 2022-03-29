@@ -41,7 +41,7 @@ public class CarManager implements CarService {
 	@Override
 	public Result update(UpdateCarRequest updateCarRequest){
 		
-		checkCarId(updateCarRequest.getCarId());
+		checkCarIdExists(updateCarRequest.getCarId());
 		
 		Car car = this.modelMapperService.forRequest().map(updateCarRequest, Car.class);
 		this.carDao.save(car);
@@ -75,7 +75,7 @@ public class CarManager implements CarService {
 	@Override
 	public DataResult<CarDto> getById(int carId){
 		
-		checkCarId(carId);
+		checkCarIdExists(carId);
 		
 		Car car = this.carDao.getById(carId);
 		CarDto carDto = this.modelMapperService.forDto().map(car, CarDto.class);
@@ -125,7 +125,7 @@ public class CarManager implements CarService {
 	@Override
 	public Result delete(int carId){
 		
-		checkCarId(carId);
+		checkCarIdExists(carId);
 		
 		String carNameBeforeDelete = this.carDao.findByCarId(carId).getCarName();
 		this.carDao.deleteById(carId);
@@ -142,7 +142,7 @@ public class CarManager implements CarService {
 		
 	}
 
-	private void checkCarId(int carId){
+	private void checkCarIdExists(int carId){
 		
 		if (!this.carDao.existsById(carId)) {
 			

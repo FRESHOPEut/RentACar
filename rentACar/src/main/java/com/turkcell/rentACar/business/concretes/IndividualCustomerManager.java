@@ -132,7 +132,7 @@ public class IndividualCustomerManager implements IndividualCustomerService{
 	@Override
 	public Result delete(int individualCustomerId){
 		
-		checkIndividualCustomerId(individualCustomerId);
+		checkIndividualCustomerIdExists(individualCustomerId);
 		
 		String individualCustomerNameBefore = this.individualCustomerDao.findById(individualCustomerId)
 			.get().getFirstname();

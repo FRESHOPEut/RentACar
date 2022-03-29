@@ -48,7 +48,7 @@ public class CityManager implements CityService {
 	@Override
 	public DataResult<CityDto> getByCityPlate(int cityPlate){
 		
-		checkCityPlate(cityPlate);
+		checkCityPlateExists(cityPlate);
 		
 		City city = this.cityDao.getById(cityPlate);
 		CityDto cityDto = this.modelMapperService.forDto().map(city, CityDto.class);
@@ -82,7 +82,7 @@ public class CityManager implements CityService {
 			+ Integer.toString(pageNo) + Messages.ISLISTEDWITHDATASIZE + Integer.toString(pageSize));
 	}
 
-	private void checkCityPlate(int cityPlate){
+	private void checkCityPlateExists(int cityPlate){
 		if (!this.cityDao.existsById(cityPlate)) {
 			
 			throw new BusinessException(Messages.CITYNOTFOUND);

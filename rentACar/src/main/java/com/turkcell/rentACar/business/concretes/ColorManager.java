@@ -41,7 +41,8 @@ public class ColorManager implements ColorService {
 	@Override
 	public Result update(UpdateColorRequest updateColorRequest){
 		
-		checkColorId(updateColorRequest.getColorId());
+		checkColorIdExists(updateColorRequest.getColorId());
+		checkColorNameExists(updateColorRequest.getColorName());
 		
 		Color color = this.modelMapperService.forRequest().map(updateColorRequest, Color.class);
 		this.colorDao.save(color);
@@ -54,7 +55,7 @@ public class ColorManager implements ColorService {
 	@Transactional
 	public Result create(CreateColorRequest createColorRequest){
 		
-		checkColorName(createColorRequest.getColorName());
+		checkColorNameExists(createColorRequest.getColorName());
 		
 		Color color = this.modelMapperService.forRequest().map(createColorRequest, Color.class);
 		this.colorDao.save(color);
@@ -77,7 +78,7 @@ public class ColorManager implements ColorService {
 	@Override
 	public DataResult<ColorDto> getById(int colorId){
 		
-		checkColorId(colorId);
+		checkColorIdExists(colorId);
 		
 		Color color = this.colorDao.getById(colorId);
 		ColorDto colorDto = this.modelMapperService.forDto().map(color, ColorDto.class);
@@ -114,7 +115,7 @@ public class ColorManager implements ColorService {
 	@Override
 	public Result delete(int colorId){
 		
-		checkColorId(colorId);
+		checkColorIdExists(colorId);
 		
 		String colorNameBeforeDelete = this.colorDao.findByColorId(colorId).getColorName();
 		this.colorDao.deleteById(colorId);
@@ -122,7 +123,7 @@ public class ColorManager implements ColorService {
 		return new SuccessResult(Messages.COLORDELETED + colorNameBeforeDelete);
 	}
 
-	private void checkColorName(String colorName){
+	private void checkColorNameExists(String colorName){
 		
 		if (this.colorDao.existsByColorName(colorName)) {
 			
@@ -130,7 +131,7 @@ public class ColorManager implements ColorService {
 		}
 	}
 
-	private void checkColorId(int colorId){
+	private void checkColorIdExists(int colorId){
 		
 		if (!this.colorDao.existsById(colorId)) {
 			

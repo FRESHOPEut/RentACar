@@ -53,8 +53,8 @@ public class InvoiceManager implements InvoiceService{
 	@Override
 	public Result update(UpdateInvoiceRequest updateInvoiceRequest) {
 		
-		checkInvoiceId(updateInvoiceRequest.getInvoiceId());
-		checkInvoiceNumber(updateInvoiceRequest.getInvoiceNumber());
+		checkInvoiceIdExists(updateInvoiceRequest.getInvoiceId());
+		checkInvoiceNumberExists(updateInvoiceRequest.getInvoiceNumber());
 		
 		RentalDto rentalDto = this.rentalService.getById(updateInvoiceRequest.getRentalId()).getData();
 		PaymentDto paymentDto = this.paymentService.getByPaymentId(updateInvoiceRequest.getPaymentId())
@@ -96,7 +96,7 @@ public class InvoiceManager implements InvoiceService{
 	@Override
 	public DataResult<InvoiceDto> getByInvoiceId(int invoiceId) {
 		
-		checkInvoiceId(invoiceId);
+		checkInvoiceIdExists(invoiceId);
 
 		Invoice invoice = this.invoiceDao.getByInvoiceId(invoiceId);
 		InvoiceDto invoiceDto = this.modelMapperService.forDto().map(invoice, InvoiceDto.class);
@@ -107,7 +107,7 @@ public class InvoiceManager implements InvoiceService{
 	@Override
 	public DataResult<InvoiceDto> getByInvoiceNumber(long invoiceNumber){
 		
-		checkInvoiceNumber(invoiceNumber);
+		checkInvoiceNumberExists(invoiceNumber);
 		
 		Invoice invoice = this.invoiceDao.getByInvoiceNumber(invoiceNumber);
 		InvoiceDto invoiceDto = this.modelMapperService.forDto().map(invoice, InvoiceDto.class);
@@ -143,7 +143,7 @@ public class InvoiceManager implements InvoiceService{
 	@Override
 	public DataResult<List<ListInvoiceDto>> getInvoiceByCustomerId(int customerId) {
 		
-		checkCustomerId(customerId);
+		checkCustomerIdExists(customerId);
 		
 		List<Invoice> invoices = this.invoiceDao.findByInvoiceCustomer_UserId(customerId);
 		List<ListInvoiceDto> listInvoiceDtos = invoices.stream()
@@ -157,14 +157,14 @@ public class InvoiceManager implements InvoiceService{
 	@Override
 	public Result delete(int invoiceId) {
 		
-		checkInvoiceId(invoiceId);
+		checkInvoiceIdExists(invoiceId);
 		
 		this.invoiceDao.deleteByInvoiceId(invoiceId);
 		
 		return new SuccessResult(Messages.INVOICEDELETED);
 	}
 	
-	private void checkInvoiceId(int invoiceId) {
+	private void checkInvoiceIdExists(int invoiceId) {
 		
 		if(!this.invoiceDao.existsByInvoiceId(invoiceId)) {
 			
@@ -172,7 +172,7 @@ public class InvoiceManager implements InvoiceService{
 		}
 	}
 	
-	private void checkInvoiceNumber(long invoiceNumber) {
+	private void checkInvoiceNumberExists(long invoiceNumber) {
 		
 		if(!this.invoiceDao.existsByInvoiceNumber(invoiceNumber)) {
 			
@@ -180,7 +180,7 @@ public class InvoiceManager implements InvoiceService{
 		}
 	}
 	
-	private void checkCustomerId(int customerId) {
+	private void checkCustomerIdExists(int customerId) {
 		
 		if(!this.invoiceDao.existsByInvoiceCustomer_UserId(customerId)) {
 			

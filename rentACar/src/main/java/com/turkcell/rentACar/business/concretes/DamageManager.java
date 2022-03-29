@@ -45,7 +45,7 @@ public class DamageManager implements DamageService {
 	@Override
 	public Result update(UpdateDamageRequest updateDamageRequest) {
 		
-		checkCarDamageId(updateDamageRequest.getDamageId());
+		checkCarDamageIdExists(updateDamageRequest.getDamageId());
 		
 		Damage damage = this.modelMapperService.forRequest().map(updateDamageRequest, Damage.class);
 		this.damageDao.save(damage);
@@ -81,7 +81,7 @@ public class DamageManager implements DamageService {
 	@Override
 	public DataResult<DamageDto> getById(int damageId) {
 		
-		checkCarDamageId(damageId);
+		checkCarDamageIdExists(damageId);
 		
 		Damage damage = this.damageDao.getById(damageId);
 		DamageDto damageDto = this.modelMapperService.forDto().map(damage, DamageDto.class);
@@ -118,14 +118,14 @@ public class DamageManager implements DamageService {
 	@Override
 	public Result delete(int damageId) {
 		
-		checkCarDamageId(damageId);
+		checkCarDamageIdExists(damageId);
 		
 		this.damageDao.deleteById(damageId);
 		
 		return new SuccessResult(Messages.DAMAGEDELETED + damageId);
 	}
 	
-	private void checkCarDamageId(int damageId) {
+	private void checkCarDamageIdExists(int damageId) {
 		
 		if(!this.damageDao.existsByDamageId(damageId)) {
 			

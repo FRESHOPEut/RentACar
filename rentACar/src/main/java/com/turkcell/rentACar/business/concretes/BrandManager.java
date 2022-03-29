@@ -41,7 +41,8 @@ public class BrandManager implements BrandService {
 	@Override
 	public Result update(UpdateBrandRequest updateBrandRequest){
 		
-		checkBrandId(updateBrandRequest.getBrandId());
+		checkBrandIdExists(updateBrandRequest.getBrandId());
+		checkBrandNameExists(updateBrandRequest.getBrandName());
 		
 		Brand brand = this.modelMapperService.forRequest().map(updateBrandRequest, Brand.class);
 		this.brandDao.save(brand);
@@ -54,7 +55,7 @@ public class BrandManager implements BrandService {
 	@Transactional
 	public Result create(CreateBrandRequest createBrandRequest){
 		
-		checkBrandName(createBrandRequest.getBrandName());
+		checkBrandNameExists(createBrandRequest.getBrandName());
 		
 		Brand brand = this.modelMapperService.forRequest().map(createBrandRequest, Brand.class);
 		this.brandDao.save(brand);
@@ -77,7 +78,7 @@ public class BrandManager implements BrandService {
 	@Override
 	public DataResult<BrandDto> getById(int brandId){
 		
-		checkBrandId(brandId);
+		checkBrandIdExists(brandId);
 		
 		Brand brand = this.brandDao.getById(brandId);
 		BrandDto brandDto = this.modelMapperService.forDto().map(brand, BrandDto.class);
@@ -115,7 +116,7 @@ public class BrandManager implements BrandService {
 	@Override
 	public Result delete(int brandId){
 		
-		checkBrandId(brandId);
+		checkBrandIdExists(brandId);
 		
 		String brandNameBeforeDelete = this.brandDao.findByBrandId(brandId).getBrandName();
 		this.brandDao.deleteById(brandId);
@@ -123,7 +124,7 @@ public class BrandManager implements BrandService {
 		return new SuccessResult(Messages.BRANDDELETED + brandNameBeforeDelete);
 	}
 
-	private void checkBrandName(String brandName){
+	private void checkBrandNameExists(String brandName){
 		
 		if (this.brandDao.existsByBrandName(brandName)) {
 			
@@ -131,7 +132,7 @@ public class BrandManager implements BrandService {
 		}
 	}
 
-	private void checkBrandId(int brandId){
+	private void checkBrandIdExists(int brandId){
 		
 		if (!this.brandDao.existsById(brandId)) {
 			
