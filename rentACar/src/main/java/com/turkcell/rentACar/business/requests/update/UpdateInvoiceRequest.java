@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 public class UpdateInvoiceRequest {
 
 	@NotNull
-	private long invoiceId;
+	private int invoiceId;
 	
 	@NotNull
 	private long invoiceNumber;

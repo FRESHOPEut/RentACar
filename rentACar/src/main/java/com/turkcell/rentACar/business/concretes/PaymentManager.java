@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.turkcell.rentACar.business.abstracts.CreditCardService;
 import com.turkcell.rentACar.business.abstracts.PaymentService;
+import com.turkcell.rentACar.business.abstracts.RentalService;
 import com.turkcell.rentACar.business.constants.Messages;
 import com.turkcell.rentACar.business.dtos.payment.ListPaymentDto;
 import com.turkcell.rentACar.business.dtos.payment.PaymentDto;
@@ -37,21 +38,24 @@ public class PaymentManager implements PaymentService{
 	private ModelMapperService modelMapperService;
 	private PosService posService;
 	private CreditCardService creditCardService;
+	private RentalService rentalService;
 
 	@Autowired
 	public PaymentManager(PaymentDao paymentDao, ModelMapperService modelMapperService,
-			PosService posService, CreditCardService creditCardService) {
+			PosService posService, CreditCardService creditCardService, RentalService rentalService) {
 
 		this.paymentDao = paymentDao;
 		this.modelMapperService = modelMapperService;
 		this.posService = posService;
 		this.creditCardService = creditCardService;
+		this.rentalService = rentalService;
 	}
 
 	@Override
 	public Result update(UpdatePaymentRequest updatePaymentRequest) {
 		
 		checkPaymentId(updatePaymentRequest.getPaymentId());
+		isRentalExists(updatePaymentRequest.getRentalId());
 		
 		Payment payment = this.modelMapperService.forRequest().map(updatePaymentRequest, Payment.class);
 		
@@ -68,12 +72,11 @@ public class PaymentManager implements PaymentService{
 	@Transactional
 	public Result create(CreatePaymentRequest createPaymentRequest, boolean saveCard) {
 		
+		isRentalExists(createPaymentRequest.getRentalId());
+		
 		Payment payment = this.modelMapperService.forRequest().map(createPaymentRequest, Payment.class);
-		
 		checkPaymentMethodIsValid(payment.getPaymentCard());
-		
 		saveCreditCard(createPaymentRequest.getCreditCard(), saveCard);
-		
 		this.paymentDao.save(payment);
 		
 		return new SuccessDataResult<CreatePaymentRequest>(createPaymentRequest, Messages.PAYMENTADDED);
@@ -83,9 +86,9 @@ public class PaymentManager implements PaymentService{
 	public Result createWithSavedCard(CreatePaymentWithSavedCardRequest createPaymentWithSavedCardRequest) {
 		
 		checkCreditCardExists(createPaymentWithSavedCardRequest.getCreditCardId());
+		isRentalExists(createPaymentWithSavedCardRequest.getRentalId());
 		
 		Payment payment = this.modelMapperService.forRequest().map(createPaymentWithSavedCardRequest, Payment.class);
-		
 		this.paymentDao.save(payment);
 		
 		return new SuccessDataResult<CreatePaymentWithSavedCardRequest>(createPaymentWithSavedCardRequest, Messages.PAYMENTADDED);
@@ -186,6 +189,14 @@ public class PaymentManager implements PaymentService{
 		if(payment.getPaymentCard().getCreditCardCustomer().getUserId() != payment.getPaymentRental().getRentalCustomer().getUserId()) {
 			
 			throw new BusinessException(Messages.CUSTOMERANDCARDDOESNOTMATCH);
+		}
+	}
+	
+	private void isRentalExists(int rentalId) {
+		
+		if(!this.rentalService.getById(rentalId).isSuccess()) {
+			
+			throw new BusinessException(Messages.RENTALNOTFOUND);
 		}
 	}
 }

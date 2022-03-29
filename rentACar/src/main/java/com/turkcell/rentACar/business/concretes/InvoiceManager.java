@@ -54,6 +54,7 @@ public class InvoiceManager implements InvoiceService{
 	public Result update(UpdateInvoiceRequest updateInvoiceRequest) {
 		
 		checkInvoiceId(updateInvoiceRequest.getInvoiceId());
+		checkInvoiceNumber(updateInvoiceRequest.getInvoiceNumber());
 		
 		RentalDto rentalDto = this.rentalService.getById(updateInvoiceRequest.getRentalId()).getData();
 		PaymentDto paymentDto = this.paymentService.getByPaymentId(updateInvoiceRequest.getPaymentId())
@@ -93,7 +94,7 @@ public class InvoiceManager implements InvoiceService{
 	}
 
 	@Override
-	public DataResult<InvoiceDto> getByInvoiceId(long invoiceId) {
+	public DataResult<InvoiceDto> getByInvoiceId(int invoiceId) {
 		
 		checkInvoiceId(invoiceId);
 
@@ -101,6 +102,17 @@ public class InvoiceManager implements InvoiceService{
 		InvoiceDto invoiceDto = this.modelMapperService.forDto().map(invoice, InvoiceDto.class);
 		
 		return new SuccessDataResult<InvoiceDto>(invoiceDto, Messages.INVOICEGETTEDBYID);
+	}
+	
+	@Override
+	public DataResult<InvoiceDto> getByInvoiceNumber(long invoiceNumber){
+		
+		checkInvoiceNumber(invoiceNumber);
+		
+		Invoice invoice = this.invoiceDao.getByInvoiceNumber(invoiceNumber);
+		InvoiceDto invoiceDto = this.modelMapperService.forDto().map(invoice, InvoiceDto.class);
+		
+		return new SuccessDataResult<InvoiceDto>(invoiceDto, Messages.INVOICEGETTEDBYNUMBER);
 	}
 
 	@Override
@@ -143,7 +155,7 @@ public class InvoiceManager implements InvoiceService{
 	}
 
 	@Override
-	public Result delete(long invoiceId) {
+	public Result delete(int invoiceId) {
 		
 		checkInvoiceId(invoiceId);
 		
@@ -152,11 +164,19 @@ public class InvoiceManager implements InvoiceService{
 		return new SuccessResult(Messages.INVOICEDELETED);
 	}
 	
-	private void checkInvoiceId(long invoiceId) {
+	private void checkInvoiceId(int invoiceId) {
 		
 		if(!this.invoiceDao.existsByInvoiceId(invoiceId)) {
 			
 			throw new BusinessException(Messages.INVOICENOTFOUND);
+		}
+	}
+	
+	private void checkInvoiceNumber(long invoiceNumber) {
+		
+		if(!this.invoiceDao.existsByInvoiceNumber(invoiceNumber)) {
+			
+			throw new BusinessException(Messages.INVOICENOTFOUNDBYNUMBER);
 		}
 	}
 	

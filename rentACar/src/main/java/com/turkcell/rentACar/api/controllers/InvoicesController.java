@@ -53,10 +53,16 @@ public class InvoicesController {
 		return this.invoiceService.listAll();
 	}
 	
-	@GetMapping("/getByInvoiceNo")
-	public DataResult<InvoiceDto> getByInvoiceNo(@RequestParam long invoiceId){
+	@GetMapping("/getById")
+	public DataResult<InvoiceDto> getByInvoiceNumber(@RequestParam int invoiceId){
 		
 		return this.invoiceService.getByInvoiceId(invoiceId);
+	}
+	
+	@GetMapping("/getByInvoiceNumber")
+	public DataResult<InvoiceDto> getByInvoiceNo(@RequestParam long invoiceNumber){
+		
+		return this.invoiceService.getByInvoiceNumber(invoiceNumber);
 	}
 	
 	@GetMapping("/getAllPaged")
@@ -78,7 +84,7 @@ public class InvoicesController {
 	}
 	
 	@DeleteMapping("/delete")
-	public Result delete(@RequestParam long invoiceNo) {
+	public Result delete(@RequestParam int invoiceNo) {
 		
 		return this.invoiceService.delete(invoiceNo);
 	}

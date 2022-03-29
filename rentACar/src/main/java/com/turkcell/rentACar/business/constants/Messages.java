@@ -100,8 +100,10 @@ public class Messages {
 	public static final String INVOICEDELETED = "Invoice Deleted: ";
 	public static final String INVOICESLISTED = "Invoices Listed";
 	public static final String INVOICEGETTEDBYID = "Invoice getted by Id";
+	public static final String INVOICEGETTEDBYNUMBER = "Invoice getted by InvoiceNumber";
 	public static final String INVOICESGETTEDBYCUSTOMERID = "Invoices listed with respect to Customer Id: ";
 	public static final String INVOICENOTFOUND = "This Invoice Id is undefined!";
+	public static final String INVOICENOTFOUNDBYNUMBER = "This Invoice Number is undefined!";
 	public static final String INVOICECUSTOMERRENTNOTFOUND = "Customer has not already Rent any Car";
 	
 	public static final String PAYMENTADDED = "Payment Added";

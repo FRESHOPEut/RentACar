@@ -18,7 +18,9 @@ public interface InvoiceService {
 	
 	DataResult<List<ListInvoiceDto>> listAll();
 	
-	DataResult<InvoiceDto> getByInvoiceId(long invoiceId);
+	DataResult<InvoiceDto> getByInvoiceId(int invoiceId);
+	
+	DataResult<InvoiceDto> getByInvoiceNumber(long invoiceNumber);
 	
 	DataResult<List<ListInvoiceDto>> getAllPaged(int pageNo, int pageSize);
 	
@@ -26,5 +28,5 @@ public interface InvoiceService {
 	
 	DataResult<List<ListInvoiceDto>> getInvoiceByCustomerId(int customerId);
 	
-	Result delete(long invoiceNo);
+	Result delete(int invoiceNo);
 }
