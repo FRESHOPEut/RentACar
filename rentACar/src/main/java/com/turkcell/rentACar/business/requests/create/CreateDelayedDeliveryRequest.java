@@ -10,19 +10,22 @@ import org.springframework.lang.Nullable;
 import com.turkcell.rentACar.business.dtos.additionalService.AdditionalServiceIdDto;
 
 import lombok.AllArgsConstructor;
-import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.Data;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class CreateRentalRequest {
+public class CreateDelayedDeliveryRequest {
 
 	@NotNull
 	private int carId;
 
 	@NotNull
 	private int customerId;
+	
+	@NotNull
+	private LocalDate rentDate;
 	
 	@NotNull
 	private LocalDate returnDate;

@@ -1,6 +1,7 @@
 package com.turkcell.rentACar.business.concretes;
 
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -20,7 +21,7 @@ import com.turkcell.rentACar.business.constants.Messages;
 import com.turkcell.rentACar.business.dtos.car.CarDto;
 import com.turkcell.rentACar.business.dtos.rental.ListRentalDto;
 import com.turkcell.rentACar.business.dtos.rental.RentalDto;
-import com.turkcell.rentACar.business.requests.create.CreateCarRequest;
+import com.turkcell.rentACar.business.requests.create.CreateDelayedDeliveryRequest;
 import com.turkcell.rentACar.business.requests.create.CreateRentalRequest;
 import com.turkcell.rentACar.business.requests.update.UpdateCarRequest;
 import com.turkcell.rentACar.business.requests.update.UpdateRentalRequest;
@@ -69,6 +70,7 @@ public class RentalManager implements RentalService {
 		Rental rental = this.modelMapperService.forRequest().map(updateRentalRequest, Rental.class);
 		calculateTotalDailyPrice(rental.getRentalId());
 		updateCarKilometer(updateRentalRequest);
+		delayedDelivery(updateRentalRequest, rental);
 		this.rentalDao.save(rental);
 		
 		return new SuccessDataResult<UpdateRentalRequest>(updateRentalRequest,
@@ -163,6 +165,12 @@ public class RentalManager implements RentalService {
 			}
 		}
 	}
+	
+	public void createDelayedDelivery(CreateDelayedDeliveryRequest createDelayedDeliveryRequest) {
+		
+		Rental rental = this.modelMapperService.forRequest().map(createDelayedDeliveryRequest, Rental.class);
+		this.rentalDao.save(rental);
+	}
 
 	private void checkRentalIdExists(int rentalId){
 		
@@ -214,5 +222,30 @@ public class RentalManager implements RentalService {
 			
 			throw new BusinessException(Messages.RENTALCARKILOMETER);
 		}
+	}
+	
+	private void delayedDelivery(UpdateRentalRequest updateRentalRequest, Rental rental) {
+		if(rental.getReturnDate() != updateRentalRequest.getReturnDate()) {
+			
+			totalPriceCalculator(rental, calculateExpiredDate(rental.getRentalDate(), updateRentalRequest.getReturnDate()));
+			CreateDelayedDeliveryRequest newRental = new CreateDelayedDeliveryRequest(updateRentalRequest.getCarId(),
+					updateRentalRequest.getCustomerId(), rental.getReturnDate(),
+					updateRentalRequest.getReturnDate(), updateRentalRequest.getCurrentCityPlate(),
+					updateRentalRequest.getReturnCityPlate(), updateRentalRequest.getAdditionalServicesIds());
+			
+			createDelayedDelivery(newRental);
+		}
+	}
+	
+	private int calculateExpiredDate(LocalDate deliveryDate, LocalDate deliveredDate) {
+		
+		return Integer.valueOf((int) ChronoUnit.DAYS.between(deliveryDate, deliveredDate));
+	}
+	
+	private double totalPriceCalculator(Rental rental, int passedDays) {
+		
+		double totalPrice = rental.getRentalTotalDailyPrice() * passedDays;
+		
+		return totalPrice;
 	}
 }
