@@ -20,7 +20,9 @@ import com.turkcell.rentACar.business.constants.Messages;
 import com.turkcell.rentACar.business.dtos.car.CarDto;
 import com.turkcell.rentACar.business.dtos.rental.ListRentalDto;
 import com.turkcell.rentACar.business.dtos.rental.RentalDto;
+import com.turkcell.rentACar.business.requests.create.CreateCarRequest;
 import com.turkcell.rentACar.business.requests.create.CreateRentalRequest;
+import com.turkcell.rentACar.business.requests.update.UpdateCarRequest;
 import com.turkcell.rentACar.business.requests.update.UpdateRentalRequest;
 import com.turkcell.rentACar.core.exceptions.BusinessException;
 import com.turkcell.rentACar.core.utilities.mapping.abstracts.ModelMapperService;
@@ -203,7 +205,10 @@ public class RentalManager implements RentalService {
 		if(car.getKilometerOfCar() < updateRentalRequest.getReturnKilometer()) {
 			
 			car.setKilometerOfCar(updateRentalRequest.getReturnKilometer());
-			this.carService.updateKilometer(car);
+			UpdateCarRequest updateCarRequest = this.modelMapperService.forRequest().map(car, UpdateCarRequest.class); 
+			this.carService.update(updateCarRequest);
+			//this.carService.updateKilometer(car);
+			//update kısmını dene olmazsa request mapping kaldır
 			
 		}else {
 			

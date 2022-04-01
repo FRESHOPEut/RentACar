@@ -136,7 +136,7 @@ public class CarManager implements CarService {
 	@Override
 	public void updateKilometer(Car car) {
 		
-		checkCarId(car.getCarId());
+		checkCarIdExists(car.getCarId());
 		
 		this.carDao.save(car);
 		
