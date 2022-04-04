@@ -49,7 +49,6 @@ public class CorporateCustomerManager implements CorporateCustomerService {
 
 		checkCorporateCustomerIdExists(updateCorporateCustomerRequest.getCorporateCustomerId());
 		checkCorporateNameExists(updateCorporateCustomerRequest.getCorporateName());
-		checkTaxNoExists(updateCorporateCustomerRequest.getTaxNo());
 		this.customerService.checkEmailExists(updateCorporateCustomerRequest.getEmail());
 		  
 		CorporateCustomer corporateCustomer = this.modelMapperService.forRequest()
@@ -67,6 +66,7 @@ public class CorporateCustomerManager implements CorporateCustomerService {
 		
 		LocalDate date = LocalDate.now();
 		
+		checkCorporateTaxNoContainsLetter(createCorporateCustomerRequest.getTaxNo());
 		checkCorporateNameExists(createCorporateCustomerRequest.getCorporateName());
 		checkTaxNoExists(createCorporateCustomerRequest.getTaxNo());
 		this.customerService.checkEmailExists(createCorporateCustomerRequest.getEmail());
@@ -181,6 +181,16 @@ public class CorporateCustomerManager implements CorporateCustomerService {
 		}else if(pageSize <= 0) {
 			
 			throw new BusinessException(Messages.PAGESIZECANNOTLESSTHANZERO);
+		}
+	}
+	
+	private void checkCorporateTaxNoContainsLetter(String taxNo) {
+		
+		boolean result = taxNo.matches("[0-9]+");
+		
+		if(!result) {
+			
+			throw new BusinessException(Messages.CORPORATECUSTOMERTAXNOCONTAINSLETTER);
 		}
 	}
 }

@@ -27,12 +27,6 @@ public class UpdateCorporateCustomerRequest {
 	@NotNull
 	@NotEmpty
 	@NotBlank
-	@Size(min = 10, max = 10)
-	private String taxNo;
-
-	@NotNull
-	@NotEmpty
-	@NotBlank
 	@Email
 	private String email;
 	

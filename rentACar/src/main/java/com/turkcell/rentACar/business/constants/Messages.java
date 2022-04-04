@@ -72,6 +72,7 @@ public class Messages {
 	public static final String CORPORATECUSTOMERNOTFOUND = "This CorporateCustomer Id is undefined!";
 	public static final String CORPORATECUSTOMERTAXNOEXISTS = "This Tax Number is already exists: ";
 	public static final String CORPORATECUSTOMEREXISTS = "This CorporateCustomer is already exists: ";
+	public static final String CORPORATECUSTOMERTAXNOCONTAINSLETTER = "CorporateCustomer TaxNo cannot contains any letter";
 	
 	public static final String CREDITCARDADDED = "CreditCard Added";
 	public static final String CREDITCARDUPDATED = "CreditCard Updated";
@@ -89,6 +90,7 @@ public class Messages {
 	public static final String INDIVIDUALCUSTOMERGETTEDBYID = "IndividualCustomer getted by Id";
 	public static final String INDIVIDUALCUSTOMERNOTFOUND = "This IndividualCustomer Id is undefined!";
 	public static final String INDIVIDUALCUSTOMERIDENTITYEXISTS = "This National Identity is already exists: ";
+	public static final String INDIVIDUALCUSTOMERIDENTITYNOCONTAINSLETTER = "IndividualCustomer IdentityNo cannot contains any letter";
 	
 	public static final String DAMAGEADDED = "Damage Added: ";
 	public static final String DAMAGEUPDATED = "Damage Updated: ";

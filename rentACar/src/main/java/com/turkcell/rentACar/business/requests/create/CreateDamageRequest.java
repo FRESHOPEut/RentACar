@@ -17,5 +17,5 @@ public class CreateDamageRequest {
 	private String damageDescription;
 	
 	@NotNull
-	private int carId;
+	private int damageCarId;
 }

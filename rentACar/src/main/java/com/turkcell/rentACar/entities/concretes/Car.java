@@ -58,6 +58,6 @@ public class Car {
 	@OneToMany(mappedBy = "rentalCar", fetch = FetchType.LAZY)
 	private List<Rental> carRentals;
 	
-	@OneToMany(mappedBy = "damageCar", fetch = FetchType.LAZY)
+	@OneToMany(mappedBy = "damagedCar", fetch = FetchType.LAZY)
 	private List<Damage> carDamages;
 }

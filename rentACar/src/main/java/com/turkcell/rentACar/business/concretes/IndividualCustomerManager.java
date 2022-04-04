@@ -48,7 +48,6 @@ public class IndividualCustomerManager implements IndividualCustomerService{
 	public Result update(UpdateIndividualCustomerRequest updateIndividualCustomerRequest){
 		
 		checkIndividualCustomerIdExists(updateIndividualCustomerRequest.getIndividualCustomerId());
-		checkNationalIdentityExists(updateIndividualCustomerRequest.getNationalIdentity());
 		this.customerService.checkEmailExists(updateIndividualCustomerRequest.getEmail());
 		
 		IndividualCustomer individualCustomer = this.modelMapperService.forRequest()
@@ -65,6 +64,7 @@ public class IndividualCustomerManager implements IndividualCustomerService{
 		
 		LocalDate date = LocalDate.now();
 		
+		checkIndividualIdentityNoContainsLetter(createIndividualCustomerRequest.getNationalIdentity());
 		checkNationalIdentityExists(createIndividualCustomerRequest.getNationalIdentity());
 		this.customerService.checkEmailExists(createIndividualCustomerRequest.getEmail());
 		
@@ -168,6 +168,16 @@ public class IndividualCustomerManager implements IndividualCustomerService{
 		}else if(pageSize <= 0) {
 			
 			throw new BusinessException(Messages.PAGESIZECANNOTLESSTHANZERO);
+		}
+	}
+	
+	private void checkIndividualIdentityNoContainsLetter(String identityNo) {
+		
+		boolean result = identityNo.matches("[0-9]+");
+		
+		if(!result) {
+			
+			throw new BusinessException(Messages.INDIVIDUALCUSTOMERIDENTITYNOCONTAINSLETTER);
 		}
 	}
 }

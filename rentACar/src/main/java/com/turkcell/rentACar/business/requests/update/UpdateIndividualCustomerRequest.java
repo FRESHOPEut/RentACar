@@ -17,12 +17,6 @@ public class UpdateIndividualCustomerRequest {
 	
 	@NotNull
 	private int individualCustomerId;
-
-	@NotNull
-	@NotEmpty
-	@NotBlank
-	@Size(min = 11, max = 11)
-	private String nationalIdentity;
 	
 	@NotNull
 	@NotEmpty
