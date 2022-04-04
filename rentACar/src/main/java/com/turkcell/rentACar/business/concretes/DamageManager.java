@@ -70,7 +70,8 @@ public class DamageManager implements DamageService {
 	@Override
 	public DataResult<List<ListDamageDto>> listAll() {
 		
-		List<Damage> damages = this.damageDao.findAll();
+		Sort sort = Sort.by(Direction.ASC, "damageId");
+		List<Damage> damages = this.damageDao.findAll(sort);
 		List<ListDamageDto> listDamageDtos = damages.stream()
 			.map(damage -> this.modelMapperService.forDto().map(damage, ListDamageDto.class))
 			.collect(Collectors.toList());
@@ -105,6 +106,8 @@ public class DamageManager implements DamageService {
 	@Override
 	public DataResult<List<ListDamageDto>> getAllPaged(int pageNo, int pageSize) {
 		
+		checkPageNoAndPageSize(pageNo, pageSize);
+		
 		Pageable pageable = PageRequest.of(pageNo - 1, pageSize);
 		List<Damage> damages = this.damageDao.findAll(pageable).getContent();
 		List<ListDamageDto> listDamageDtos = damages.stream()
@@ -138,6 +141,17 @@ public class DamageManager implements DamageService {
 		if(!this.carService.getById(carId).isSuccess()) {
 			
 			throw new BusinessException(Messages.CARNOTFOUND);
+		}
+	}
+	
+	private void checkPageNoAndPageSize(int pageNo, int pageSize) {
+		
+		if(pageNo <= 0) {
+			
+			throw new BusinessException(Messages.PAGENOCANNOTLESSTHANZERO);
+		}else if(pageSize <= 0) {
+			
+			throw new BusinessException(Messages.PAGESIZECANNOTLESSTHANZERO);
 		}
 	}
 }

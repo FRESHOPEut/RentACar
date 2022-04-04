@@ -80,7 +80,8 @@ public class IndividualCustomerManager implements IndividualCustomerService{
 	@Override
 	public DataResult<List<ListIndividualCustomerDto>> listAll(){
 		
-		List<IndividualCustomer> individualCustomers = this.individualCustomerDao.findAll();
+		Sort sort = Sort.by(Direction.ASC, "userId");
+		List<IndividualCustomer> individualCustomers = this.individualCustomerDao.findAll(sort);
 		List<ListIndividualCustomerDto> listIndividualCustomerDtos = individualCustomers.stream()
 			.map(individualCustomer -> this.modelMapperService.forDto()
 			.map(individualCustomer, ListIndividualCustomerDto.class)).collect(Collectors.toList());
@@ -118,6 +119,8 @@ public class IndividualCustomerManager implements IndividualCustomerService{
 	@Override
 	public DataResult<List<ListIndividualCustomerDto>> getAllPaged(int pageNo, int pageSize){
 		
+		checkPageNoAndPageSize(pageNo, pageSize);
+		
 		Pageable pageable = PageRequest.of(pageNo - 1, pageSize);
 		List<IndividualCustomer> individualCustomers = this.individualCustomerDao.findAll(pageable).getContent();
 		List<ListIndividualCustomerDto> listIndividualCustomerDtos = individualCustomers.stream()
@@ -154,6 +157,17 @@ public class IndividualCustomerManager implements IndividualCustomerService{
 		if(!this.individualCustomerDao.existsById(individualCustomerId)) {
 			
 			throw new BusinessException(Messages.INDIVIDUALCUSTOMERNOTFOUND);
+		}
+	}
+	
+	private void checkPageNoAndPageSize(int pageNo, int pageSize) {
+		
+		if(pageNo <= 0) {
+			
+			throw new BusinessException(Messages.PAGENOCANNOTLESSTHANZERO);
+		}else if(pageSize <= 0) {
+			
+			throw new BusinessException(Messages.PAGESIZECANNOTLESSTHANZERO);
 		}
 	}
 }

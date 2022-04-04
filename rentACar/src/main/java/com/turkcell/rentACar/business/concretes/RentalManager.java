@@ -9,6 +9,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -106,7 +108,8 @@ public class RentalManager implements RentalService {
 	@Override
 	public DataResult<List<ListRentalDto>> listAll(){
 		
-		List<Rental> rentals = this.rentalDao.findAll();
+		Sort sort = Sort.by(Direction.ASC, "rentalId");
+		List<Rental> rentals = this.rentalDao.findAll(sort);
 		List<ListRentalDto> listRentalDtos = rentals.stream()
 			.map(rental -> this.modelMapperService.forDto().map(rental, ListRentalDto.class))
 			.collect(Collectors.toList());
@@ -127,6 +130,8 @@ public class RentalManager implements RentalService {
 
 	@Override
 	public DataResult<List<ListRentalDto>> getAllPaged(int pageNo, int pageSize){
+		
+		checkPageNoAndPageSize(pageNo, pageSize);
 		
 		Pageable pageable = PageRequest.of(pageNo - 1, pageSize);
 		List<Rental> rentals = this.rentalDao.findAll(pageable).getContent();
@@ -247,5 +252,16 @@ public class RentalManager implements RentalService {
 		double totalPrice = rental.getRentalTotalDailyPrice() * passedDays;
 		
 		return totalPrice;
+	}
+	
+	private void checkPageNoAndPageSize(int pageNo, int pageSize) {
+		
+		if(pageNo <= 0) {
+			
+			throw new BusinessException(Messages.PAGENOCANNOTLESSTHANZERO);
+		}else if(pageSize <= 0) {
+			
+			throw new BusinessException(Messages.PAGESIZECANNOTLESSTHANZERO);
+		}
 	}
 }

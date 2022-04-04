@@ -84,7 +84,8 @@ public class CorporateCustomerManager implements CorporateCustomerService {
 	@Override
 	public DataResult<List<ListCorporateCustomerDto>> listAll(){
 		
-		List<CorporateCustomer> corporateCustomers = this.corporateCustomerDao.findAll();
+		Sort sort = Sort.by(Direction.ASC, "userId");
+		List<CorporateCustomer> corporateCustomers = this.corporateCustomerDao.findAll(sort);
 		List<ListCorporateCustomerDto> listCorporateCustomerDtos = corporateCustomers.stream()
 			.map(corporateCustomer -> this.modelMapperService.forDto().map(corporateCustomer,
 			ListCorporateCustomerDto.class)).collect(Collectors.toList());
@@ -121,6 +122,8 @@ public class CorporateCustomerManager implements CorporateCustomerService {
 
 	@Override
 	public DataResult<List<ListCorporateCustomerDto>> getAllPaged(int pageNo, int pageSize){
+		
+		checkPageNoAndPageSize(pageNo, pageSize);
 		
 		Pageable pageable = PageRequest.of(pageNo - 1, pageSize);
 		List<CorporateCustomer> corporateCustomers = this.corporateCustomerDao.findAll(pageable)
@@ -167,6 +170,17 @@ public class CorporateCustomerManager implements CorporateCustomerService {
 		if (this.corporateCustomerDao.existsByTaxNo(taxNo)) {
 			
 			throw new BusinessException(Messages.CORPORATECUSTOMERTAXNOEXISTS + taxNo);
+		}
+	}
+	
+	private void checkPageNoAndPageSize(int pageNo, int pageSize) {
+		
+		if(pageNo <= 0) {
+			
+			throw new BusinessException(Messages.PAGENOCANNOTLESSTHANZERO);
+		}else if(pageSize <= 0) {
+			
+			throw new BusinessException(Messages.PAGESIZECANNOTLESSTHANZERO);
 		}
 	}
 }

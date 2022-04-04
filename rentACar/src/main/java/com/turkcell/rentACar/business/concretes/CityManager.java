@@ -37,7 +37,8 @@ public class CityManager implements CityService {
 	@Override
 	public DataResult<List<ListCityDto>> listAll(){
 		
-		List<City> cities = this.cityDao.findAll();
+		Sort sort = Sort.by(Direction.ASC, "cityPlate");
+		List<City> cities = this.cityDao.findAll(sort);
 		List<ListCityDto> listCityDtos = cities.stream()
 			.map(city -> this.modelMapperService.forDto().map(city, ListCityDto.class))
 			.collect(Collectors.toList());
@@ -72,6 +73,8 @@ public class CityManager implements CityService {
 	@Override
 	public DataResult<List<ListCityDto>> getAllPaged(int pageNo, int pageSize){
 		
+		checkPageNoAndPageSize(pageNo, pageSize);
+		
 		Pageable pageable = PageRequest.of(pageNo - 1, pageSize);
 		List<City> cities = this.cityDao.findAll(pageable).getContent();
 		List<ListCityDto> listCityDtos = cities.stream()
@@ -86,6 +89,17 @@ public class CityManager implements CityService {
 		if (!this.cityDao.existsById(cityPlate)) {
 			
 			throw new BusinessException(Messages.CITYNOTFOUND);
+		}
+	}
+	
+	private void checkPageNoAndPageSize(int pageNo, int pageSize) {
+		
+		if(pageNo <= 0) {
+			
+			throw new BusinessException(Messages.PAGENOCANNOTLESSTHANZERO);
+		}else if(pageSize <= 0) {
+			
+			throw new BusinessException(Messages.PAGESIZECANNOTLESSTHANZERO);
 		}
 	}
 }

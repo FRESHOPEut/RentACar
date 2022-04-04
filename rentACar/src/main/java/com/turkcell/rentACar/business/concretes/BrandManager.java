@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -67,7 +68,8 @@ public class BrandManager implements BrandService {
 	@Override
 	public DataResult<List<ListBrandDto>> listAll(){
 		
-		List<Brand> brands = this.brandDao.findAll();
+		Sort sort = Sort.by(Direction.ASC, "brandId");
+		List<Brand> brands = this.brandDao.findAll(sort);
 		List<ListBrandDto> listBrandDtos = brands.stream()
 			.map(brand -> this.modelMapperService.forDto().map(brand, ListBrandDto.class))
 			.collect(Collectors.toList());
@@ -101,6 +103,8 @@ public class BrandManager implements BrandService {
 
 	@Override
 	public DataResult<List<ListBrandDto>> getAllPaged(int pageNo, int pageSize){
+		
+		checkPageNoAndPageSize(pageNo, pageSize);
 		
 		Pageable pageable = PageRequest.of(pageNo - 1, pageSize);
 		List<Brand> brands = this.brandDao.findAll(pageable).getContent();
@@ -137,6 +141,17 @@ public class BrandManager implements BrandService {
 		if (!this.brandDao.existsById(brandId)) {
 			
 			throw new BusinessException(Messages.BRANDNOTFOUND);
+		}
+	}
+	
+	private void checkPageNoAndPageSize(int pageNo, int pageSize) {
+		
+		if(pageNo <= 0) {
+			
+			throw new BusinessException(Messages.PAGENOCANNOTLESSTHANZERO);
+		}else if(pageSize <= 0) {
+			
+			throw new BusinessException(Messages.PAGESIZECANNOTLESSTHANZERO);
 		}
 	}
 }

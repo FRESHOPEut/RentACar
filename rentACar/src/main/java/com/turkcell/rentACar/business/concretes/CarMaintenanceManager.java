@@ -8,6 +8,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -84,7 +86,8 @@ public class CarMaintenanceManager implements CarMaintenanceService {
 	@Override
 	public DataResult<List<ListCarMaintenanceDto>> listAll(){
 		
-		List<CarMaintenance> carMaintenances = this.carMaintenanceDao.findAll();
+		Sort sort = Sort.by(Direction.ASC, "carMaintenanceId");
+		List<CarMaintenance> carMaintenances = this.carMaintenanceDao.findAll(sort);
 		List<ListCarMaintenanceDto> listCarMaintenanceDtos = carMaintenances.stream()
 			.map(carMaintenance -> this.modelMapperService.forDto()
 			.map(carMaintenance, ListCarMaintenanceDto.class)).collect(Collectors.toList());
@@ -107,6 +110,8 @@ public class CarMaintenanceManager implements CarMaintenanceService {
 
 	@Override
 	public DataResult<List<ListCarMaintenanceDto>> getAllPaged(int pageNo, int pageSize){
+		
+		checkPageNoAndPageSize(pageNo, pageSize);
 		
 		Pageable pageable = PageRequest.of(pageNo - 1, pageSize);
 		List<CarMaintenance> carMaintenances = this.carMaintenanceDao.findAll(pageable).getContent();
@@ -176,6 +181,17 @@ public class CarMaintenanceManager implements CarMaintenanceService {
 					throw new BusinessException(Messages.CARMAINTENANCESTILLMAINTENANCED);
 				}
 			}
+		}
+	}
+	
+	private void checkPageNoAndPageSize(int pageNo, int pageSize) {
+		
+		if(pageNo <= 0) {
+			
+			throw new BusinessException(Messages.PAGENOCANNOTLESSTHANZERO);
+		}else if(pageSize <= 0) {
+			
+			throw new BusinessException(Messages.PAGESIZECANNOTLESSTHANZERO);
 		}
 	}
 }

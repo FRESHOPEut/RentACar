@@ -44,6 +44,7 @@ public class AdditionalServiceManager implements AdditionalServiceService {
 	public Result update(UpdateAdditionalServiceRequest updateAdditionalServiceRequest){
 		
 		checkAdditionalServiceIdExists(updateAdditionalServiceRequest.getAdditionalServiceId());
+		checkAdditionalServiceNameExists(updateAdditionalServiceRequest.getAdditionalServiceName());
 		
 		AdditionalService additionalService = this.modelMapperService.forRequest()
 			.map(updateAdditionalServiceRequest, AdditionalService.class);
@@ -70,7 +71,8 @@ public class AdditionalServiceManager implements AdditionalServiceService {
 	@Override
 	public DataResult<List<ListAdditionalServiceDto>> listAll(){
 		
-		List<AdditionalService> additionalServices = this.additionalServiceDao.findAll();		
+		Sort sort = Sort.by(Direction.ASC, "additionalServiceId");
+		List<AdditionalService> additionalServices = this.additionalServiceDao.findAll(sort);		
 		List<ListAdditionalServiceDto> listAdditionalServiceDtos = additionalServices.stream()
 			.map(additionalService -> this.modelMapperService.forDto()
 			.map(additionalService, ListAdditionalServiceDto.class))
@@ -109,6 +111,8 @@ public class AdditionalServiceManager implements AdditionalServiceService {
 
 	@Override
 	public DataResult<List<ListAdditionalServiceDto>> getAllPaged(int pageNo, int pageSize){
+		
+		checkPageNoAndPageSize(pageNo, pageSize);
 		
 		Pageable pageable = PageRequest.of(pageNo - 1, pageSize);
 		List<AdditionalService> additionalServices = this.additionalServiceDao.findAll(pageable).getContent();
@@ -156,6 +160,18 @@ public class AdditionalServiceManager implements AdditionalServiceService {
 		if (!this.additionalServiceDao.existsById(additionalServiceId)) {
 			
 			throw new BusinessException(Messages.ADDITIONALSERVICENOTFOUND);
+		}
+	}
+	
+	private void checkPageNoAndPageSize(int pageNo, int pageSize) {
+		
+		if(pageNo <= 0) {
+			
+			throw new BusinessException(Messages.PAGENOCANNOTLESSTHANZERO);
+			
+		}else if(pageSize <= 0) {
+			
+			throw new BusinessException(Messages.PAGESIZECANNOTLESSTHANZERO);
 		}
 	}
 }

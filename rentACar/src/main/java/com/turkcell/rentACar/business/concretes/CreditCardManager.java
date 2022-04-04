@@ -74,7 +74,8 @@ public class CreditCardManager implements CreditCardService{
 	@Override
 	public DataResult<List<ListCreditCardDto>> listAll() {
 		
-		List<CreditCard> creditCards = this.creditCardDao.findAll();
+		Sort sort = Sort.by(Direction.ASC, "creditCardId");
+		List<CreditCard> creditCards = this.creditCardDao.findAll(sort);
 		List<ListCreditCardDto> listCreditCardDtos = creditCards.stream()
 			.map(creditCard -> this.modelMapperService.forDto().map(creditCard, ListCreditCardDto.class))
 			.collect(Collectors.toList());
@@ -121,6 +122,8 @@ public class CreditCardManager implements CreditCardService{
 	@Override
 	public DataResult<List<ListCreditCardDto>> getAllPaged(int pageNo, int pageSize) {
 		
+		checkPageNoAndPageSize(pageNo, pageSize);
+		
 		Pageable pageable = PageRequest.of(pageNo - 1, pageSize);
 		List<CreditCard> creditCards = this.creditCardDao.findAll(pageable).getContent();
 		List<ListCreditCardDto> listCreditCardDtos = creditCards.stream()
@@ -163,6 +166,17 @@ public class CreditCardManager implements CreditCardService{
 		if(this.creditCardDao.existsByCreditCardNumber(creditCardNumber)) {
 			
 			throw new BusinessException(Messages.CREDITCARDISEXISTS);
+		}
+	}
+	
+	private void checkPageNoAndPageSize(int pageNo, int pageSize) {
+		
+		if(pageNo <= 0) {
+			
+			throw new BusinessException(Messages.PAGENOCANNOTLESSTHANZERO);
+		}else if(pageSize <= 0) {
+			
+			throw new BusinessException(Messages.PAGESIZECANNOTLESSTHANZERO);
 		}
 	}
 }

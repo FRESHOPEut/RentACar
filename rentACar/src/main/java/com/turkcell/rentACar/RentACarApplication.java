@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import com.turkcell.rentACar.business.constants.Messages;
 import com.turkcell.rentACar.core.exceptions.BusinessException;
 import com.turkcell.rentACar.core.utilities.results.ErrorDataResult;
 
@@ -39,7 +40,7 @@ public class RentACarApplication {
 			validationErrors.put(fieldError.getField(), fieldError.getDefaultMessage());
 		}
 
-		ErrorDataResult<Object> errorDataResult = new ErrorDataResult<Object>(validationErrors, "Validation.Errors");
+		ErrorDataResult<Object> errorDataResult = new ErrorDataResult<Object>(validationErrors, Messages.VALIDATIONERRORS);
 		return errorDataResult;
 	}
 
@@ -47,7 +48,7 @@ public class RentACarApplication {
 	@ResponseStatus(code = HttpStatus.BAD_REQUEST)
 	public ErrorDataResult<Object> handleBusinessExceptions(BusinessException businessException) {
 		ErrorDataResult<Object> errorDataResult = new ErrorDataResult<Object>(businessException.getMessage(),
-				"Business.Error");
+				Messages.BUSINESSEXCEPTIONERRORS);
 		return errorDataResult;
 	}
 }

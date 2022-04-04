@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -67,7 +68,8 @@ public class ColorManager implements ColorService {
 	@Override
 	public DataResult<List<ListColorDto>> listAll(){
 		
-		List<Color> colors = this.colorDao.findAll();
+		Sort sort = Sort.by(Direction.ASC, "colorId");
+		List<Color> colors = this.colorDao.findAll(sort);
 		List<ListColorDto> listColorDtos = colors.stream()
 			.map(color -> this.modelMapperService.forDto().map(color, ListColorDto.class))
 			.collect(Collectors.toList());
@@ -101,6 +103,8 @@ public class ColorManager implements ColorService {
 
 	@Override
 	public DataResult<List<ListColorDto>> getAllPaged(int pageNo, int pageSize){
+		
+		checkPageNoAndPageSize(pageNo, pageSize);
 		
 		Pageable pageable = PageRequest.of(pageNo - 1, pageSize);
 		List<Color> colors = this.colorDao.findAll(pageable).getContent();
@@ -136,6 +140,17 @@ public class ColorManager implements ColorService {
 		if (!this.colorDao.existsById(colorId)) {
 			
 			throw new BusinessException(Messages.COLORNOTFOUND);
+		}
+	}
+	
+	private void checkPageNoAndPageSize(int pageNo, int pageSize) {
+		
+		if(pageNo <= 0) {
+			
+			throw new BusinessException(Messages.PAGENOCANNOTLESSTHANZERO);
+		}else if(pageSize <= 0) {
+			
+			throw new BusinessException(Messages.PAGESIZECANNOTLESSTHANZERO);
 		}
 	}
 }

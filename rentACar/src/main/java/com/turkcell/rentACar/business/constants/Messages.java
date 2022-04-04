@@ -12,9 +12,11 @@ public class Messages {
 	public static final String AND = " and ";
 	public static final String DATABETWEEN = "Data between ";
 	public static final String ISLISTED = " is listed";
-	public static final String EMAILEXISTS = "This Customer Email is already exists";
-	public static final String CUSTOMERNOTFOUND = "This Customer Id is undefined";
-	public static final String CUSTOMERANDCARDDOESNOTMATCH = "This Customer is not permit to Rent A Car with this Credit Card";
+	public static final String EMAILEXISTS = "This Customer Email is already exists!";
+	public static final String CUSTOMERNOTFOUND = "This Customer Id is undefined!";
+	public static final String CUSTOMERANDCARDDOESNOTMATCH = "This Customer is not permit to Rent A Car with this Credit Card!";
+	public static final String PAGENOCANNOTLESSTHANZERO = "Page number must be higher than zero(0)!";
+	public static final String PAGESIZECANNOTLESSTHANZERO = "Page size must be higher than zero(0)!";
 	
 	public static final String ADDITIONALSERVICEADDED = "AdditionalService Added: ";
 	public static final String ADDITIONALSERVICEUPDATED = "AdditionalService Updated: ";

@@ -8,6 +8,8 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -85,7 +87,8 @@ public class InvoiceManager implements InvoiceService{
 	@Override
 	public DataResult<List<ListInvoiceDto>> listAll() {
 		
-		List<Invoice> invoices = this.invoiceDao.findAll();
+		Sort sort = Sort.by(Direction.ASC, "invoiceId");
+		List<Invoice> invoices = this.invoiceDao.findAll(sort);
 		List<ListInvoiceDto> listInvoiceDtos = invoices.stream()
 			.map(invoice -> this.modelMapperService.forDto().map(invoice, ListInvoiceDto.class))
 			.collect(Collectors.toList());
@@ -117,6 +120,8 @@ public class InvoiceManager implements InvoiceService{
 
 	@Override
 	public DataResult<List<ListInvoiceDto>> getAllPaged(int pageNo, int pageSize) {
+		
+		checkPageNoAndPageSize(pageNo, pageSize);
 		
 		Pageable pageable = PageRequest.of(pageNo - 1, pageSize);
 		List<Invoice> invoices = this.invoiceDao.findAll(pageable).getContent();
@@ -248,5 +253,16 @@ public class InvoiceManager implements InvoiceService{
 		}
 		
 		return totalPrice;
+	}
+	
+	private void checkPageNoAndPageSize(int pageNo, int pageSize) {
+		
+		if(pageNo <= 0) {
+			
+			throw new BusinessException(Messages.PAGENOCANNOTLESSTHANZERO);
+		}else if(pageSize <= 0) {
+			
+			throw new BusinessException(Messages.PAGESIZECANNOTLESSTHANZERO);
+		}
 	}
 }
