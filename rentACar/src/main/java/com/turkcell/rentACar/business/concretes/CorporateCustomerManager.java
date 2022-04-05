@@ -47,12 +47,14 @@ public class CorporateCustomerManager implements CorporateCustomerService {
 	@Override
 	public Result update(UpdateCorporateCustomerRequest updateCorporateCustomerRequest){
 
-		checkCorporateCustomerIdExists(updateCorporateCustomerRequest.getCorporateCustomerId());
-		checkCorporateNameExists(updateCorporateCustomerRequest.getCorporateName());
+		checkCorporateCustomerIdExists(updateCorporateCustomerRequest.getUserId());
 		this.customerService.checkEmailExists(updateCorporateCustomerRequest.getEmail());
-		  
+		
+		CorporateCustomerDto corporateCustomerTemp = getByCorporateCustomerId(updateCorporateCustomerRequest.getUserId()).getData();
 		CorporateCustomer corporateCustomer = this.modelMapperService.forRequest()
 			.map(updateCorporateCustomerRequest, CorporateCustomer.class);
+		corporateCustomer.setRegisteredDate(corporateCustomerTemp.getRegisteredDate());
+		corporateCustomer.setTaxNo(corporateCustomerTemp.getTaxNo());
 		this.corporateCustomerDao.save(corporateCustomer);
 		 
 		
@@ -75,7 +77,6 @@ public class CorporateCustomerManager implements CorporateCustomerService {
 			.map(createCorporateCustomerRequest, CorporateCustomer.class);
 		corporateCustomer.setRegisteredDate(date);
 		this.corporateCustomerDao.save(corporateCustomer);
-		 
 
 		return new SuccessDataResult<CreateCorporateCustomerRequest>(createCorporateCustomerRequest,
 			Messages.CORPORATECUSTOMERADDED + corporateCustomer.getCorporateName());
@@ -87,8 +88,8 @@ public class CorporateCustomerManager implements CorporateCustomerService {
 		Sort sort = Sort.by(Direction.ASC, "userId");
 		List<CorporateCustomer> corporateCustomers = this.corporateCustomerDao.findAll(sort);
 		List<ListCorporateCustomerDto> listCorporateCustomerDtos = corporateCustomers.stream()
-			.map(corporateCustomer -> this.modelMapperService.forDto().map(corporateCustomer,
-			ListCorporateCustomerDto.class)).collect(Collectors.toList());
+			.map(corporateCustomer -> this.modelMapperService.forDto()
+			.map(corporateCustomer, ListCorporateCustomerDto.class)).collect(Collectors.toList());
 		
 		return new SuccessDataResult<List<ListCorporateCustomerDto>>(listCorporateCustomerDtos,
 			Messages.CORPORATECUSTOMERSLISTED);

@@ -59,8 +59,7 @@ public class InvoiceManager implements InvoiceService{
 		checkInvoiceNumberExists(updateInvoiceRequest.getInvoiceNumber());
 		
 		RentalDto rentalDto = this.rentalService.getById(updateInvoiceRequest.getRentalId()).getData();
-		PaymentDto paymentDto = this.paymentService.getByPaymentId(updateInvoiceRequest.getPaymentId())
-			.getData();
+		PaymentDto paymentDto = this.paymentService.getByPaymentId(updateInvoiceRequest.getPaymentId()).getData();
 		Invoice invoice = this.modelMapperService.forRequest().map(updateInvoiceRequest, Invoice.class);
 		invoice = updatingInvoice(rentalDto, paymentDto, invoice);
 		this.invoiceDao.save(invoice);

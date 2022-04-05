@@ -16,7 +16,7 @@ import lombok.NoArgsConstructor;
 public class UpdateCorporateCustomerRequest {
 
 	@NotNull
-	private int corporateCustomerId;
+	private int userId;
 	
 	@NotNull
 	@NotEmpty

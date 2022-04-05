@@ -19,10 +19,10 @@ import lombok.NoArgsConstructor;
 @PrimaryKeyJoinColumn(name = "user_id")
 public class CorporateCustomer extends Customer {
 
-	@Column(name = "corporate_name")
+	@Column(name = "name")
 	private String corporateName;
 
-	@Column(name = "corporate_tax_no", unique = true)
+	@Column(name = "tax_no", unique = true)
 	private String taxNo;
 
 }

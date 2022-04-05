@@ -20,7 +20,7 @@ public class ModelMapperManager implements ModelMapperService {
 	public ModelMapper forDto() {
 		
 		this.modelMapper.getConfiguration().setAmbiguityIgnored(true)
-			.setMatchingStrategy(MatchingStrategies.LOOSE);
+			.setMatchingStrategy(MatchingStrategies.STANDARD);
 		
 		return this.modelMapper;
 	}

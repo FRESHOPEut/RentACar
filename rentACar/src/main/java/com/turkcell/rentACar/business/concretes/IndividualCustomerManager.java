@@ -47,11 +47,14 @@ public class IndividualCustomerManager implements IndividualCustomerService{
 	@Override
 	public Result update(UpdateIndividualCustomerRequest updateIndividualCustomerRequest){
 		
-		checkIndividualCustomerIdExists(updateIndividualCustomerRequest.getIndividualCustomerId());
+		checkIndividualCustomerIdExists(updateIndividualCustomerRequest.getUserId());
 		this.customerService.checkEmailExists(updateIndividualCustomerRequest.getEmail());
 		
+		IndividualCustomerDto individualCustomerTemp = getByIndividualCustomerId(updateIndividualCustomerRequest.getUserId()).getData();
 		IndividualCustomer individualCustomer = this.modelMapperService.forRequest()
 			.map(updateIndividualCustomerRequest, IndividualCustomer.class);
+		individualCustomer.setRegisteredDate(individualCustomerTemp.getRegisteredDate());
+		individualCustomer.setNationalIdentity(individualCustomerTemp.getNationalIdentity());
 		this.individualCustomerDao.save(individualCustomer);
 		
 		return new SuccessDataResult<UpdateIndividualCustomerRequest>(updateIndividualCustomerRequest,

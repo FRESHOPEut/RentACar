@@ -58,7 +58,7 @@ public class DamageManager implements DamageService {
 	@Transactional
 	public Result create(CreateDamageRequest createDamageRequest) {
 		
-		checkCarExists(createDamageRequest.getDamageCarId());
+		checkCarExists(createDamageRequest.getCarId());
 		
 		Damage damage = this.modelMapperService.forRequest().map(createDamageRequest, Damage.class);
 		this.damageDao.save(damage);
