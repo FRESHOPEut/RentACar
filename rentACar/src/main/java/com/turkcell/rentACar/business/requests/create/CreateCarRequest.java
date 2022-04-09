@@ -23,7 +23,7 @@ public class CreateCarRequest {
 	private String carName;
 
 	@NotNull
-	@Min(0)
+	@Min(100)
 	@Max(2000)
 	private double dailyPrice;
 

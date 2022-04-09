@@ -11,7 +11,9 @@ import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.turkcell.rentACar.business.abstracts.BrandService;
 import com.turkcell.rentACar.business.abstracts.CarService;
+import com.turkcell.rentACar.business.abstracts.ColorService;
 import com.turkcell.rentACar.business.constants.Messages;
 import com.turkcell.rentACar.business.dtos.car.CarDto;
 import com.turkcell.rentACar.business.dtos.car.ListCarDto;
@@ -31,18 +33,24 @@ public class CarManager implements CarService {
 
 	private CarDao carDao;
 	private ModelMapperService modelMapperService;
+	private ColorService colorService;
+	private BrandService brandService;
 	
 	@Autowired
-	public CarManager(CarDao carDao, ModelMapperService modelMapperService) {
+	public CarManager(CarDao carDao, ModelMapperService modelMapperService,	ColorService colorService, BrandService brandService) {
 		
 		this.carDao = carDao;
 		this.modelMapperService = modelMapperService;
+		this.colorService = colorService;
+		this.brandService = brandService;
 	}
 
 	@Override
 	public Result update(UpdateCarRequest updateCarRequest){
 		
 		checkCarIdExists(updateCarRequest.getCarId());
+		checkColorExists(updateCarRequest.getColorId());
+		checkBrandExists(updateCarRequest.getBrandId());
 		
 		Car car = this.modelMapperService.forRequest().map(updateCarRequest, Car.class);
 		this.carDao.save(car);
@@ -54,6 +62,9 @@ public class CarManager implements CarService {
 	@Override
 	@Transactional
 	public Result create(CreateCarRequest createCarRequest){
+		
+		checkColorExists(createCarRequest.getColorId());
+		checkBrandExists(createCarRequest.getBrandId());
 		
 		Car car = this.modelMapperService.forRequest().map(createCarRequest, Car.class);
 		this.carDao.save(car);
@@ -162,6 +173,22 @@ public class CarManager implements CarService {
 		}else if(pageSize <= 0) {
 			
 			throw new BusinessException(Messages.PAGESIZECANNOTLESSTHANZERO);
+		}
+	}
+	
+	private void checkColorExists(int colorId) {
+		
+		if(!this.colorService.getById(colorId).isSuccess()) {
+			
+			throw new BusinessException(Messages.COLORNOTFOUND);
+		}
+	}
+	
+	private void checkBrandExists(int brandId) {
+		
+		if(!this.brandService.getById(brandId).isSuccess()) {
+			
+			throw new BusinessException(Messages.BRANDNOTFOUND);
 		}
 	}
 }

@@ -17,6 +17,7 @@ public class Messages {
 	public static final String CUSTOMERANDCARDDOESNOTMATCH = "This Customer is not permit to Rent A Car with this Credit Card!";
 	public static final String PAGENOCANNOTLESSTHANZERO = "Page number must be higher than zero(0)!";
 	public static final String PAGESIZECANNOTLESSTHANZERO = "Page size must be higher than zero(0)!";
+	public static final String JSONPARSEERRORS = "Sent JSON data is readable!";
 	
 	public static final String ADDITIONALSERVICEADDED = "AdditionalService Added: ";
 	public static final String ADDITIONALSERVICEUPDATED = "AdditionalService Updated: ";
