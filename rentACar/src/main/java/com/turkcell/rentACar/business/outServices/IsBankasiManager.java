@@ -14,7 +14,6 @@ public class IsBankasiManager{
 		
 		if(lastDigits+cvv == 989) {
 			
-			System.out.println("İş bankası ile ödendi");
 			return true;
 		}
 		

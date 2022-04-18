@@ -2,6 +2,7 @@ package com.turkcell.rentACar.business.dtos.car;
 
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.turkcell.rentACar.business.dtos.damage.ListDamageDto;
 
 import lombok.AllArgsConstructor;
@@ -12,6 +13,9 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class CarDto {
+	
+	@JsonIgnore
+	private int carId;
 
 	private String carName;
 	
@@ -23,7 +27,13 @@ public class CarDto {
 	
 	private int kilometerOfCar;
 	
+	@JsonIgnore
+	private String brandId;
+	
 	private String brandName;
+	
+	@JsonIgnore
+	private String colorId;
 	
 	private String colorName;
 	

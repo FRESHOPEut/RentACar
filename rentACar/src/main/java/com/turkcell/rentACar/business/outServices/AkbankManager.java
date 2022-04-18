@@ -12,7 +12,6 @@ public class AkbankManager{
 		
 		if(lastDigits+cvv == 979) {
 			
-			System.out.println("Akbank ile ödendi");
 			return true;
 		}
 		

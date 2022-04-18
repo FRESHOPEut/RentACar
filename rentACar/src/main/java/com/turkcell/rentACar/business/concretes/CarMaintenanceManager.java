@@ -17,6 +17,7 @@ import com.turkcell.rentACar.business.abstracts.CarMaintenanceService;
 import com.turkcell.rentACar.business.abstracts.CarService;
 import com.turkcell.rentACar.business.abstracts.RentalService;
 import com.turkcell.rentACar.business.constants.Messages;
+import com.turkcell.rentACar.business.dtos.car.CarDto;
 import com.turkcell.rentACar.business.dtos.carMaintenance.CarMaintenanceDto;
 import com.turkcell.rentACar.business.dtos.carMaintenance.ListCarMaintenanceDto;
 import com.turkcell.rentACar.business.requests.create.CreateCarMaintenanceRequest;
@@ -28,6 +29,7 @@ import com.turkcell.rentACar.core.utilities.results.Result;
 import com.turkcell.rentACar.core.utilities.results.SuccessDataResult;
 import com.turkcell.rentACar.core.utilities.results.SuccessResult;
 import com.turkcell.rentACar.dataAccess.abstracts.CarMaintenanceDao;
+import com.turkcell.rentACar.entities.concretes.Car;
 import com.turkcell.rentACar.entities.concretes.CarMaintenance;
 
 @Service
@@ -49,15 +51,21 @@ public class CarMaintenanceManager implements CarMaintenanceService {
 	}
 
 	@Override
+	@Transactional
 	public Result update(UpdateCarMaintenanceRequest updateCarMaintenanceRequest){
 		
+
 		checkCarMaintenanceIdExists(updateCarMaintenanceRequest.getCarMaintenanceId());
 		this.rentalService.checkCarAlreadyRented(updateCarMaintenanceRequest.getCarId());
-		checkCarAlreadyMaintenanced(updateCarMaintenanceRequest.getCarId());
 		checkCarIdExists(updateCarMaintenanceRequest.getCarId());
-		
+
+		LocalDate date = getById(updateCarMaintenanceRequest.getCarMaintenanceId()).getData().getMaintenanceDate();
+		CarDto carDto = this.carService.getById(updateCarMaintenanceRequest.getCarId()).getData();
+		Car car = this.modelMapperService.forDto().map(carDto, Car.class);
+		updateCarMaintenanceRequest.setMaintenanceDate(date);
 		CarMaintenance carMaintenance = this.modelMapperService.forRequest()
 			.map(updateCarMaintenanceRequest, CarMaintenance.class);
+		carMaintenance.setCarMaintenanceCar(car);
 		this.carMaintenanceDao.save(carMaintenance);
 		
 		return new SuccessDataResult<UpdateCarMaintenanceRequest>(updateCarMaintenanceRequest,

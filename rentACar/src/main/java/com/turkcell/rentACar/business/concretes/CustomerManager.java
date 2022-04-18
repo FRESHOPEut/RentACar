@@ -35,7 +35,7 @@ public class CustomerManager implements CustomerService{
 	@Override
 	public void checkCustomerExists(int customerId) {
 		
-		if(this.customerDao.existsById(customerId)) {
+		if(!this.customerDao.existsById(customerId)) {
 			
 			throw new BusinessException(Messages.CUSTOMERNOTFOUND);
 		}
@@ -44,7 +44,7 @@ public class CustomerManager implements CustomerService{
 	@Override
 	public void checkEmailExists(String email) {
 		
-		if(this.customerDao.existsByEmail(email)) {
+		if(!this.customerDao.existsByEmail(email)) {
 			
 			throw new BusinessException(Messages.EMAILEXISTS);
 		}

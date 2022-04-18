@@ -38,4 +38,6 @@ public class CreateDelayedDeliveryRequest {
 
 	@Nullable
 	private List<AdditionalServiceIdDto> additionalServicesIds;
+	
+	private double totalDailyPrice;
 }

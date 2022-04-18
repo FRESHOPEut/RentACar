@@ -20,6 +20,7 @@ import com.turkcell.rentACar.business.abstracts.CarService;
 import com.turkcell.rentACar.business.abstracts.CustomerService;
 import com.turkcell.rentACar.business.abstracts.RentalService;
 import com.turkcell.rentACar.business.constants.Messages;
+import com.turkcell.rentACar.business.dtos.additionalService.AdditionalServiceIdDto;
 import com.turkcell.rentACar.business.dtos.car.CarDto;
 import com.turkcell.rentACar.business.dtos.rental.ListRentalDto;
 import com.turkcell.rentACar.business.dtos.rental.RentalDto;
@@ -62,17 +63,21 @@ public class RentalManager implements RentalService {
 	}
 
 	@Override
+	@Transactional
 	public Result update(UpdateRentalRequest updateRentalRequest){
 		
 		checkRentalIdExists(updateRentalRequest.getRentalId());
 		this.carMaintenanceService.checkCarAlreadyMaintenanced(updateRentalRequest.getCarId());
+		this.customerService.checkCustomerExists(updateRentalRequest.getCustomerId());
 		checkCarAlreadyRented(updateRentalRequest.getCarId());
 		checkCarIdExists(updateRentalRequest.getCarId());
+		checkAdditionalServiceExists(updateRentalRequest.getAdditionalServicesIds());
 		
-		Rental rental = this.modelMapperService.forRequest().map(updateRentalRequest, Rental.class);
+		RentalDto rentalDto = getById(updateRentalRequest.getRentalId()).getData();
+		Rental rental = this.modelMapperService.forDto().map(updateRentalRequest, Rental.class);
+		delayedDelivery(updateRentalRequest, rental, rentalDto);
 		calculateTotalDailyPrice(rental.getRentalId());
 		updateCarKilometer(updateRentalRequest);
-		delayedDelivery(updateRentalRequest, rental);
 		this.rentalDao.save(rental);
 		
 		return new SuccessDataResult<UpdateRentalRequest>(updateRentalRequest,
@@ -87,14 +92,16 @@ public class RentalManager implements RentalService {
 		LocalDate date = LocalDate.now();
 		
 		this.carMaintenanceService.checkCarAlreadyMaintenanced(createRentalRequest.getCarId());
+		this.customerService.checkCustomerExists(createRentalRequest.getCustomerId());
 		checkCarAlreadyRented(createRentalRequest.getCarId());
 		checkCarIdExists(createRentalRequest.getCarId());
+		checkAdditionalServiceExists(createRentalRequest.getAdditionalServicesIds());
 		
 		Rental rental = this.modelMapperService.forRequest().map(createRentalRequest, Rental.class);
 		CarDto carDto = this.carService.getById(createRentalRequest.getCarId()).getData();
 		rental.setRentalCustomer(this.customerService.setByCustomerId(createRentalRequest.getCustomerId()));
 		rental.setRentalDate(date);
-		rental.setRentedKilometer(carDto.getKilometerOfCar());
+		rental.setRentedKilometer(carDto.getKilometerOfCar());;
 		this.rentalDao.save(rental);
 
 		rental.setRentalTotalDailyPrice(calculateTotalDailyPrice(rental.getRentalId()));
@@ -170,12 +177,6 @@ public class RentalManager implements RentalService {
 			}
 		}
 	}
-	
-	public void createDelayedDelivery(CreateDelayedDeliveryRequest createDelayedDeliveryRequest) {
-		
-		Rental rental = this.modelMapperService.forRequest().map(createDelayedDeliveryRequest, Rental.class);
-		this.rentalDao.save(rental);
-	}
 
 	private void checkRentalIdExists(int rentalId){
 		
@@ -220,8 +221,6 @@ public class RentalManager implements RentalService {
 			car.setKilometerOfCar(updateRentalRequest.getReturnKilometer());
 			UpdateCarRequest updateCarRequest = this.modelMapperService.forRequest().map(car, UpdateCarRequest.class); 
 			this.carService.update(updateCarRequest);
-			//this.carService.updateKilometer(car);
-			//update kısmını dene olmazsa request mapping kaldır
 			
 		}else {
 			
@@ -229,16 +228,27 @@ public class RentalManager implements RentalService {
 		}
 	}
 	
-	private void delayedDelivery(UpdateRentalRequest updateRentalRequest, Rental rental) {
-		if(rental.getReturnDate() != updateRentalRequest.getReturnDate()) {
+	private void delayedDelivery(UpdateRentalRequest updateRentalRequest, Rental rental, RentalDto rentalDto) {
+		
+		if(rentalDto.getReturnDate() == updateRentalRequest.getReturnDate()) {
 			
-			totalPriceCalculator(rental, calculateExpiredDate(rental.getRentalDate(), updateRentalRequest.getReturnDate()));
-			CreateDelayedDeliveryRequest newRental = new CreateDelayedDeliveryRequest(updateRentalRequest.getCarId(),
-					updateRentalRequest.getCustomerId(), rental.getReturnDate(),
-					updateRentalRequest.getReturnDate(), updateRentalRequest.getCurrentCityPlate(),
-					updateRentalRequest.getReturnCityPlate(), updateRentalRequest.getAdditionalServicesIds());
+			rental.setRentalTotalDailyPrice(rentalDto.getTotalDailyPrice());
+			rental.setRentedKilometer(this.rentalDao.getById(updateRentalRequest.getRentalId()).getRentedKilometer());
+			rental.setRentalCustomer(this.customerService.setByCustomerId(updateRentalRequest.getCustomerId()));
+			rental.setRentalDate(rentalDto.getRentalDate());
+		}
+		
+		if(rentalDto.getReturnDate() != updateRentalRequest.getReturnDate()) {
 			
-			createDelayedDelivery(newRental);
+			double totalPrice = totalPriceCalculator(rental, calculateExpiredDate(rentalDto.getRentalDate(),
+					updateRentalRequest.getReturnDate()));
+			
+			CreateRentalRequest newRental = new CreateRentalRequest(updateRentalRequest.getCarId(),
+					updateRentalRequest.getCustomerId(), updateRentalRequest.getReturnDate(),
+					updateRentalRequest.getCurrentCityPlate(), updateRentalRequest.getReturnCityPlate(),
+					updateRentalRequest.getAdditionalServicesIds(), totalPrice);
+			
+			create(newRental);
 		}
 	}
 	
@@ -262,6 +272,16 @@ public class RentalManager implements RentalService {
 		}else if(pageSize <= 0) {
 			
 			throw new BusinessException(Messages.PAGESIZECANNOTLESSTHANZERO);
+		}
+	}
+	
+	private void checkAdditionalServiceExists(List<AdditionalServiceIdDto> additionalServiceIds) {
+		
+		for (AdditionalServiceIdDto additionalServiceIdDto : additionalServiceIds) {
+			if(!this.additionalServiceService.getById(additionalServiceIdDto.getAdditionalServiceId()).isSuccess()) {
+				
+				throw new BusinessException(Messages.ADDITIONALSERVICENOTFOUND);
+			}
 		}
 	}
 }

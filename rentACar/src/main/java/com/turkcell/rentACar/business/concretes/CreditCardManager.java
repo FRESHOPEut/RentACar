@@ -19,6 +19,7 @@ import com.turkcell.rentACar.business.requests.create.CreateCreditCardRequest;
 import com.turkcell.rentACar.business.requests.update.UpdateCreditCardRequest;
 import com.turkcell.rentACar.core.exceptions.BusinessException;
 import com.turkcell.rentACar.core.utilities.mapping.abstracts.ModelMapperService;
+import com.turkcell.rentACar.core.utilities.posServiceAdapter.abstracts.PosService;
 import com.turkcell.rentACar.core.utilities.results.DataResult;
 import com.turkcell.rentACar.core.utilities.results.Result;
 import com.turkcell.rentACar.core.utilities.results.SuccessDataResult;
@@ -32,13 +33,15 @@ public class CreditCardManager implements CreditCardService{
 	private CreditCardDao creditCardDao;
 	private ModelMapperService modelMapperService;
 	private CustomerService customerService;
+	private PosService posService;
 	
 	@Autowired
-	public CreditCardManager(CreditCardDao creditCardDao, ModelMapperService modelMapperService, CustomerService customerService) {
+	public CreditCardManager(CreditCardDao creditCardDao, ModelMapperService modelMapperService, CustomerService customerService, PosService posService) {
 
 		this.creditCardDao = creditCardDao;
 		this.modelMapperService = modelMapperService;
 		this.customerService = customerService;
+		this.posService = posService;
 	}
 
 	@Override
@@ -50,6 +53,7 @@ public class CreditCardManager implements CreditCardService{
 		
 		CreditCard creditCard = this.modelMapperService.forRequest()
 			.map(updateCreditCardRequest, CreditCard.class);
+		checkCreditCardIsValid(creditCard);
 		this.creditCardDao.save(creditCard);
 		
 		return new SuccessDataResult<UpdateCreditCardRequest>(updateCreditCardRequest,
@@ -64,6 +68,7 @@ public class CreditCardManager implements CreditCardService{
 		
 		CreditCard creditCard = this.modelMapperService.forRequest()
 			.map(createCreditCardRequest, CreditCard.class);
+		checkCreditCardIsValid(creditCard);
 		this.creditCardDao.save(creditCard);
 		
 		
@@ -177,6 +182,14 @@ public class CreditCardManager implements CreditCardService{
 		}else if(pageSize <= 0) {
 			
 			throw new BusinessException(Messages.PAGESIZECANNOTLESSTHANZERO);
+		}
+	}
+	
+	private void checkCreditCardIsValid(CreditCard creditCard) {
+		
+		if(!this.posService.checkCardIsActive(creditCard)) {
+			
+			throw new BusinessException(Messages.CREDITCARDNOTVALID);
 		}
 	}
 }

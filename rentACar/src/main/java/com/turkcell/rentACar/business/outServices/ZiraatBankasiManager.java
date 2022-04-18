@@ -15,7 +15,6 @@ public class ZiraatBankasiManager{
 		
 		if(lastDigits+cvv == 999) {
 			
-			System.out.println("Ziraat bankası ile ödendi");
 			return true;
 		}
 		

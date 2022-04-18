@@ -9,6 +9,8 @@ import javax.validation.constraints.Size;
 
 import org.springframework.lang.Nullable;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -30,7 +32,7 @@ public class UpdateCarMaintenanceRequest {
 	@Size(min = 2, max = 150)
 	private String description;
 
-	@NotNull
+	@JsonIgnore
 	private LocalDate maintenanceDate;
 
 	@Nullable

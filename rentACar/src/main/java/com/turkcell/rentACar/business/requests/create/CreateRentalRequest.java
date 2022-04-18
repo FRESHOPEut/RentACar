@@ -7,6 +7,7 @@ import javax.validation.constraints.NotNull;
 
 import org.springframework.lang.Nullable;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.turkcell.rentACar.business.dtos.additionalService.AdditionalServiceIdDto;
 
 import lombok.AllArgsConstructor;
@@ -35,4 +36,7 @@ public class CreateRentalRequest {
 
 	@Nullable
 	private List<AdditionalServiceIdDto> additionalServicesIds;
+	
+	@JsonIgnore
+	private double totalPrice;
 }
