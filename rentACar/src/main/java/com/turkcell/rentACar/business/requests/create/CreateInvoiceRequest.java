@@ -10,9 +10,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class CreateInvoiceRequest {
-	
-	@NotNull
-	private long invoiceNumber;
 
 	@NotNull
 	private int rentalId;

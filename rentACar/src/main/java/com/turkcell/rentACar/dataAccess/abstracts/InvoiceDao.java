@@ -15,9 +15,9 @@ public interface InvoiceDao extends JpaRepository<Invoice, Integer>{
 	
 	boolean existsByInvoiceId(int invoiceId);
 	
-	Invoice getByInvoiceNumber(long invoiceNumber);
+	Invoice getByInvoiceNumber(String invoiceNumber);
 	
-	boolean existsByInvoiceNumber(long invoiceNumber);
+	boolean existsByInvoiceNumber(String invoiceNumber);
 	
 	List<Invoice> findByInvoiceCustomer_UserId(int customerId);
 	
@@ -25,5 +25,5 @@ public interface InvoiceDao extends JpaRepository<Invoice, Integer>{
 	
 	List<Invoice> findByCreateDateBetween(LocalDate startDate, LocalDate finishDate);
 	
-	Invoice deleteByInvoiceId(long invoiceId);
+	Invoice deleteByInvoiceId(int invoiceId);
 }

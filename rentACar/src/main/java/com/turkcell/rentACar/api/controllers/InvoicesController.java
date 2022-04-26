@@ -6,6 +6,8 @@ import java.util.List;
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.format.annotation.DateTimeFormat.ISO;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -60,7 +62,7 @@ public class InvoicesController {
 	}
 	
 	@GetMapping("/getByInvoiceNumber")
-	public DataResult<InvoiceDto> getByInvoiceNo(@RequestParam long invoiceNumber){
+	public DataResult<InvoiceDto> getByInvoiceNo(@RequestParam String invoiceNumber){
 		
 		return this.invoiceService.getByInvoiceNumber(invoiceNumber);
 	}
@@ -72,7 +74,8 @@ public class InvoicesController {
 	}
 	
 	@GetMapping("/getByDateOfBetween")
-	public DataResult<List<ListInvoiceDto>> getByDateOfBetween(LocalDate startDate, LocalDate finishDate){
+	public DataResult<List<ListInvoiceDto>> getByDateOfBetween(@DateTimeFormat(iso = ISO.DATE) LocalDate startDate,
+			@DateTimeFormat(iso = ISO.DATE) LocalDate finishDate){
 		
 		return this.invoiceService.getByDateofBetween(startDate, finishDate);
 	}
@@ -84,8 +87,8 @@ public class InvoicesController {
 	}
 	
 	@DeleteMapping("/delete")
-	public Result delete(@RequestParam int invoiceNo) {
+	public Result delete(@RequestParam int invoiceId) {
 		
-		return this.invoiceService.delete(invoiceNo);
+		return this.invoiceService.delete(invoiceId);
 	}
 }

@@ -20,7 +20,7 @@ public interface InvoiceService {
 	
 	DataResult<InvoiceDto> getByInvoiceId(int invoiceId);
 	
-	DataResult<InvoiceDto> getByInvoiceNumber(long invoiceNumber);
+	DataResult<InvoiceDto> getByInvoiceNumber(String invoiceNumber);
 	
 	DataResult<List<ListInvoiceDto>> getAllPaged(int pageNo, int pageSize);
 	
@@ -28,5 +28,5 @@ public interface InvoiceService {
 	
 	DataResult<List<ListInvoiceDto>> getInvoiceByCustomerId(int customerId);
 	
-	Result delete(int invoiceNo);
+	Result delete(int invoiceId);
 }

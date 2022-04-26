@@ -8,6 +8,7 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
@@ -29,6 +30,7 @@ public class CreditCard {
 	private int creditCardId;
 	
 	@ManyToOne()
+	@JoinColumn(name = "customer_id")
 	private Customer creditCardCustomer;
 	
 	@Column(name = "credit_card_number")

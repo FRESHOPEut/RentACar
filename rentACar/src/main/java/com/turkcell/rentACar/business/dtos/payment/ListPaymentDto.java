@@ -1,6 +1,6 @@
 package com.turkcell.rentACar.business.dtos.payment;
 
-import com.turkcell.rentACar.business.dtos.invoice.InvoiceDto;
+import com.turkcell.rentACar.business.dtos.creditCard.CreditCardDto;
 import com.turkcell.rentACar.business.dtos.rental.RentalDto;
 
 import lombok.AllArgsConstructor;
@@ -14,7 +14,7 @@ public class ListPaymentDto {
 
 	private int paymentId;
 	
-	private RentalDto payedRental;
+	private RentalDto paymentRental;
 	
-	private InvoiceDto payedInvoice;
+	private CreditCardDto paymentCard;
 }

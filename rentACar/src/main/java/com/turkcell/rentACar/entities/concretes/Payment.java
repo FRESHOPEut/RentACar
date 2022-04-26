@@ -10,6 +10,9 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
+import org.hibernate.annotations.Cascade;
+import org.hibernate.annotations.CascadeType;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -27,6 +30,7 @@ public class Payment {
 	private int paymentId;
 	
 	@ManyToOne()
+	@Cascade(CascadeType.PERSIST)
 	@JoinColumn(name = "card_id")
 	private CreditCard paymentCard;
 	
@@ -34,7 +38,6 @@ public class Payment {
 	@JoinColumn(name = "rental_id")
 	private Rental paymentRental;
 	
-	@OneToOne()
-	@JoinColumn(name = "invoice_id")
+	@OneToOne(mappedBy = "invoicePayment")
 	private Invoice paymentInvoice;
 }

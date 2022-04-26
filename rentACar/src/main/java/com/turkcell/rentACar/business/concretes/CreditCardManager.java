@@ -3,6 +3,8 @@ package com.turkcell.rentACar.business.concretes;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import javax.transaction.Transactional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -53,6 +55,7 @@ public class CreditCardManager implements CreditCardService{
 		
 		CreditCard creditCard = this.modelMapperService.forRequest()
 			.map(updateCreditCardRequest, CreditCard.class);
+		creditCard.setCreditCardCustomer(this.customerService.setByCustomerId(updateCreditCardRequest.getCustomerId()));
 		checkCreditCardIsValid(creditCard);
 		this.creditCardDao.save(creditCard);
 		
@@ -61,16 +64,16 @@ public class CreditCardManager implements CreditCardService{
 	}
 
 	@Override
+	@Transactional
 	public Result create(CreateCreditCardRequest createCreditCardRequest) {
 		
 		checkCreditCardNumberAlreadyExists(createCreditCardRequest.getCreditCardNumber());
-		this.customerService.checkCustomerExists(createCreditCardRequest.getCustomerId());
+		this.customerService.checkCustomerExists(createCreditCardRequest.getCustomerId());		
 		
-		CreditCard creditCard = this.modelMapperService.forRequest()
-			.map(createCreditCardRequest, CreditCard.class);
+		CreditCard creditCard = this.modelMapperService.forRequest().map(createCreditCardRequest, CreditCard.class);
+		creditCard.setCreditCardCustomer(this.customerService.setByCustomerId(createCreditCardRequest.getCustomerId()));
 		checkCreditCardIsValid(creditCard);
 		this.creditCardDao.save(creditCard);
-		
 		
 		return new SuccessDataResult<CreateCreditCardRequest>(createCreditCardRequest,
 			Messages.CREDITCARDADDED);

@@ -2,6 +2,8 @@ package com.turkcell.rentACar.business.requests.create;
 
 import javax.validation.constraints.NotNull;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -10,6 +12,9 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class CreatePaymentWithSavedCardRequest {
+	
+	@JsonIgnore
+	private int paymentId;
 
 	@NotNull
 	private int rentalId;

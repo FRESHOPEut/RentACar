@@ -13,7 +13,7 @@ public class ListInvoiceDto {
 	
 	private int invoiceId;
 
-	private long invoiceNumber;
+	private String invoiceNumber;
 	
 	private LocalDate createDate;
 	

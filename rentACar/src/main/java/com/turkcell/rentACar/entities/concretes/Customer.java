@@ -30,9 +30,9 @@ public class Customer extends User {
 	@OneToMany(mappedBy = "rentalCustomer", fetch = FetchType.LAZY)
 	private List<Rental> customerRentals;
 	
-	@OneToMany(mappedBy = "invoiceCustomer")
+	@OneToMany(mappedBy = "invoiceCustomer", fetch = FetchType.LAZY)
 	private List<Invoice> customerInvoices;
 	
-	@OneToMany(mappedBy = "creditCardCustomer")
+	@OneToMany(mappedBy = "creditCardCustomer", fetch = FetchType.LAZY)
 	private List<CreditCard> customerCreditCards;
 }

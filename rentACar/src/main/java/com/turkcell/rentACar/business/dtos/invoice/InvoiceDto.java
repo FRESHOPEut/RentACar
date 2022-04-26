@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class InvoiceDto {
 
-	private long invoiceNumber;
+	private String invoiceNumber;
 	
 	private LocalDate createDate;
 	

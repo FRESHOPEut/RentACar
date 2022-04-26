@@ -29,7 +29,7 @@ public class Invoice {
 	private int invoiceId;
 	
 	@Column(name = "invoice_number")
-	private long invoiceNumber;
+	private String invoiceNumber;
 	
 	@Column(name = "create_date")
 	private LocalDate createDate;
@@ -51,10 +51,11 @@ public class Invoice {
 	private Rental invoiceRental;
 	
 	@ManyToOne()
-	@JoinColumn(name = "user_id")
+	@JoinColumn(name = "customer_id")
 	private Customer invoiceCustomer;
 	
-	@OneToOne(mappedBy = "paymentInvoice")
+	@OneToOne()
+	@JoinColumn(name = "payment_id")
 	private Payment invoicePayment;
 	
 }

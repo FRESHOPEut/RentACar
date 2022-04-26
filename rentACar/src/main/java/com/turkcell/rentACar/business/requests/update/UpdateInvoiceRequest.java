@@ -15,9 +15,6 @@ public class UpdateInvoiceRequest {
 	private int invoiceId;
 	
 	@NotNull
-	private long invoiceNumber;
-	
-	@NotNull
 	private int rentalId;
 	
 	@NotNull

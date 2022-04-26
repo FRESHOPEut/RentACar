@@ -12,18 +12,19 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.turkcell.rentACar.business.abstracts.CreditCardService;
+import com.turkcell.rentACar.business.abstracts.CustomerService;
 import com.turkcell.rentACar.business.abstracts.PaymentService;
 import com.turkcell.rentACar.business.abstracts.RentalService;
 import com.turkcell.rentACar.business.constants.Messages;
 import com.turkcell.rentACar.business.dtos.payment.ListPaymentDto;
 import com.turkcell.rentACar.business.dtos.payment.PaymentDto;
+import com.turkcell.rentACar.business.dtos.rental.RentalDto;
 import com.turkcell.rentACar.business.requests.create.CreateCreditCardRequest;
 import com.turkcell.rentACar.business.requests.create.CreatePaymentRequest;
 import com.turkcell.rentACar.business.requests.create.CreatePaymentWithSavedCardRequest;
 import com.turkcell.rentACar.business.requests.update.UpdatePaymentRequest;
 import com.turkcell.rentACar.core.exceptions.BusinessException;
 import com.turkcell.rentACar.core.utilities.mapping.abstracts.ModelMapperService;
-import com.turkcell.rentACar.core.utilities.posServiceAdapter.abstracts.PosService;
 import com.turkcell.rentACar.core.utilities.results.DataResult;
 import com.turkcell.rentACar.core.utilities.results.Result;
 import com.turkcell.rentACar.core.utilities.results.SuccessDataResult;
@@ -31,25 +32,26 @@ import com.turkcell.rentACar.core.utilities.results.SuccessResult;
 import com.turkcell.rentACar.dataAccess.abstracts.PaymentDao;
 import com.turkcell.rentACar.entities.concretes.CreditCard;
 import com.turkcell.rentACar.entities.concretes.Payment;
+import com.turkcell.rentACar.entities.concretes.Rental;
 
 @Service
 public class PaymentManager implements PaymentService{
 	
 	private PaymentDao paymentDao;
 	private ModelMapperService modelMapperService;
-	private PosService posService;
 	private CreditCardService creditCardService;
 	private RentalService rentalService;
+	private CustomerService customerService;
 
 	@Autowired
 	public PaymentManager(PaymentDao paymentDao, ModelMapperService modelMapperService,
-			PosService posService, CreditCardService creditCardService, RentalService rentalService) {
+			CreditCardService creditCardService, RentalService rentalService, CustomerService customerService) {
 
 		this.paymentDao = paymentDao;
 		this.modelMapperService = modelMapperService;
-		this.posService = posService;
 		this.creditCardService = creditCardService;
 		this.rentalService = rentalService;
+		this.customerService = customerService;
 	}
 
 	@Override
@@ -58,12 +60,7 @@ public class PaymentManager implements PaymentService{
 		checkPaymentIdExists(updatePaymentRequest.getPaymentId());
 		isRentalExists(updatePaymentRequest.getRentalId());
 		
-		Payment payment = this.modelMapperService.forRequest().map(updatePaymentRequest, Payment.class);
-		
-		checkCustomerCanUseCreditCard(payment);
-		
-		checkPaymentMethodIsValid(payment.getPaymentCard());
-		
+		Payment payment = this.modelMapperService.forRequest().map(updatePaymentRequest, Payment.class);		
 		this.paymentDao.save(payment);
 		
 		return new SuccessDataResult<UpdatePaymentRequest>(updatePaymentRequest, Messages.PAYMENTUPDATED);
@@ -74,11 +71,11 @@ public class PaymentManager implements PaymentService{
 	public Result create(CreatePaymentRequest createPaymentRequest, boolean saveCard) {
 		
 		isRentalExists(createPaymentRequest.getRentalId());
+		CreditCard creditCard = this.modelMapperService.forRequest().map(createPaymentRequest.getCreditCard(), CreditCard.class);
+		creditCard = setCustomerToCreditCard(creditCard, createPaymentRequest.getRentalId());
 		
 		Payment payment = this.modelMapperService.forRequest().map(createPaymentRequest, Payment.class);
-		checkPaymentMethodIsValid(payment.getPaymentCard());
-		saveCreditCard(createPaymentRequest.getCreditCard(), saveCard);
-		this.paymentDao.save(payment);
+		checkCreditCardIsSaved(saveCard, payment, creditCard);
 		
 		return new SuccessDataResult<CreatePaymentRequest>(createPaymentRequest, Messages.PAYMENTADDED);
 	}
@@ -164,20 +161,13 @@ public class PaymentManager implements PaymentService{
 		}
 	}
 	
-	private void checkPaymentMethodIsValid(CreditCard creditCard) {
-		
-		if(!this.posService.checkCardIsActive(creditCard)) {
-			
-			throw new BusinessException(Messages.PAYMENTMETHODNOTVALID);
-		}
-	}
-	
+	@Transactional
 	private void saveCreditCard(CreateCreditCardRequest createCreditCardRequest, boolean saveCard) {
 		
 		if(saveCard) {
-			
 			this.creditCardService.create(createCreditCardRequest);
 		}
+
 	}
 	
 	private void checkCreditCardExists(int creditCardId) {
@@ -185,14 +175,6 @@ public class PaymentManager implements PaymentService{
 		if(!this.creditCardService.getById(creditCardId).isSuccess()) {
 			
 			throw new BusinessException(Messages.CREDITCARDNOTFOUND);
-		}
-	}
-	
-	private void checkCustomerCanUseCreditCard(Payment payment) {
-		
-		if(payment.getPaymentCard().getCreditCardCustomer().getUserId() != payment.getPaymentRental().getRentalCustomer().getUserId()) {
-			
-			throw new BusinessException(Messages.CUSTOMERANDCARDDOESNOTMATCH);
 		}
 	}
 	
@@ -213,5 +195,31 @@ public class PaymentManager implements PaymentService{
 			
 			throw new BusinessException(Messages.PAGESIZECANNOTLESSTHANZERO);
 		}
+	}
+	
+	@Transactional
+	private void checkCreditCardIsSaved(boolean saveCard, Payment payment, CreditCard creditCard) {
+		
+		if(saveCard) {
+			
+			payment.setPaymentCard(creditCard);
+			
+		}
+		
+		if(saveCard == false) {
+			
+			payment.setPaymentCard(null);
+		}
+		
+		this.paymentDao.save(payment);
+	}
+	
+	private CreditCard setCustomerToCreditCard(CreditCard creditCard, int rentalId) {
+		
+		RentalDto rentalDto = this.rentalService.getById(rentalId).getData();
+		//Rental rental = this.modelMapperService.forDto().map(rentalDto, Rental.class);
+		creditCard.setCreditCardCustomer(this.customerService.setByCustomerId(rentalDto.getCustomerId()));
+		
+		return creditCard;
 	}
 }

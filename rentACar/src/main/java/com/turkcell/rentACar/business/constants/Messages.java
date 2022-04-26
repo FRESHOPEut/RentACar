@@ -103,7 +103,7 @@ public class Messages {
 	
 	public static final String INVOICEADDED = "Invoice Added: ";
 	public static final String INVOICEUPDATED = "Invoice Updated: ";
-	public static final String INVOICEDELETED = "Invoice Deleted: ";
+	public static final String INVOICEDELETED = "Invoice Deleted";
 	public static final String INVOICESLISTED = "Invoices Listed";
 	public static final String INVOICEGETTEDBYID = "Invoice getted by Id";
 	public static final String INVOICEGETTEDBYNUMBER = "Invoice getted by InvoiceNumber";

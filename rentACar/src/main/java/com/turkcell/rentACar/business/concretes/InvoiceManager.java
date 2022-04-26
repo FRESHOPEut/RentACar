@@ -3,6 +3,7 @@ package com.turkcell.rentACar.business.concretes;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +14,7 @@ import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.turkcell.rentACar.business.abstracts.CustomerService;
 import com.turkcell.rentACar.business.abstracts.InvoiceService;
 import com.turkcell.rentACar.business.abstracts.PaymentService;
 import com.turkcell.rentACar.business.abstracts.RentalService;
@@ -41,22 +43,25 @@ public class InvoiceManager implements InvoiceService{
 	private ModelMapperService modelMapperService;
 	private RentalService rentalService;
 	private PaymentService paymentService;
+	private CustomerService customerService;
 	
 	@Autowired
 	public InvoiceManager(InvoiceDao invoiceDao, ModelMapperService modelMapperService,
-			RentalService rentalService, PaymentService paymentService) {
+			RentalService rentalService, PaymentService paymentService, CustomerService customerService) {
 		
 		this.invoiceDao = invoiceDao;
 		this.modelMapperService = modelMapperService;
 		this.rentalService = rentalService;
 		this.paymentService = paymentService;
+		this.customerService = customerService;
 	}
 
 	@Override
 	public Result update(UpdateInvoiceRequest updateInvoiceRequest) {
 		
 		checkInvoiceIdExists(updateInvoiceRequest.getInvoiceId());
-		checkInvoiceNumberExists(updateInvoiceRequest.getInvoiceNumber());
+		checkRentalExists(updateInvoiceRequest.getRentalId());
+		checkPaymentExists(updateInvoiceRequest.getPaymentId());
 		
 		RentalDto rentalDto = this.rentalService.getById(updateInvoiceRequest.getRentalId()).getData();
 		PaymentDto paymentDto = this.paymentService.getByPaymentId(updateInvoiceRequest.getPaymentId()).getData();
@@ -71,6 +76,9 @@ public class InvoiceManager implements InvoiceService{
 	@Override
 	@Transactional
 	public Result create(CreateInvoiceRequest createInvoiceRequest) {
+		
+		checkRentalExists(createInvoiceRequest.getRentalId());
+		checkPaymentExists(createInvoiceRequest.getPaymentId());
 		
 		RentalDto rentalDto = this.rentalService.getById(createInvoiceRequest.getRentalId()).getData();
 		PaymentDto paymentDto = this.paymentService.getByPaymentId(createInvoiceRequest.getPaymentId())
@@ -107,7 +115,7 @@ public class InvoiceManager implements InvoiceService{
 	}
 	
 	@Override
-	public DataResult<InvoiceDto> getByInvoiceNumber(long invoiceNumber){
+	public DataResult<InvoiceDto> getByInvoiceNumber(String invoiceNumber){
 		
 		checkInvoiceNumberExists(invoiceNumber);
 		
@@ -163,7 +171,7 @@ public class InvoiceManager implements InvoiceService{
 		
 		checkInvoiceIdExists(invoiceId);
 		
-		this.invoiceDao.deleteByInvoiceId(invoiceId);
+		this.invoiceDao.deleteById(invoiceId);
 		
 		return new SuccessResult(Messages.INVOICEDELETED);
 	}
@@ -176,7 +184,7 @@ public class InvoiceManager implements InvoiceService{
 		}
 	}
 	
-	private void checkInvoiceNumberExists(long invoiceNumber) {
+	private void checkInvoiceNumberExists(String invoiceNumber) {
 		
 		if(!this.invoiceDao.existsByInvoiceNumber(invoiceNumber)) {
 			
@@ -204,8 +212,9 @@ public class InvoiceManager implements InvoiceService{
 		invoice.setReturnDate(rental.getReturnDate());
 		invoice.setRentedDays(rentedDayCalculator(rental));
 		invoice.setRentTotalPrice(totalPriceCalculator(rental, invoice.getRentedDays()));
-		invoice.setInvoiceCustomer(rental.getRentalCustomer());
+		invoice.setInvoiceCustomer(this.customerService.setByCustomerId(rentalDto.getCustomerId()));
 		invoice.setInvoicePayment(payment);
+		invoice.setInvoiceNumber(UUID.randomUUID().toString());
 		
 		return invoice;
 	}
@@ -222,8 +231,9 @@ public class InvoiceManager implements InvoiceService{
 		invoice.setReturnDate(rental.getReturnDate());
 		invoice.setRentedDays(rentedDayCalculator(rental));
 		invoice.setRentTotalPrice(totalPriceCalculator(rental, invoice.getRentedDays()));
-		invoice.setInvoiceCustomer(rental.getRentalCustomer());
+		invoice.setInvoiceCustomer(this.customerService.setByCustomerId(rentalDto.getCustomerId()));
 		invoice.setInvoicePayment(payment);
+		invoice.setInvoiceNumber(UUID.randomUUID().toString());
 		
 		return invoice;
 	}
@@ -246,7 +256,7 @@ public class InvoiceManager implements InvoiceService{
 		
 		double totalPrice = rental.getRentalTotalDailyPrice() * passedDays;
 		
-		if(rental.getCurrentCity().getCityPlate() != rental.getReturnCity().getCityPlate()) {
+		if(rental.getCurrentCity() != rental.getReturnCity()) {
 			
 			totalPrice += 750;
 		}
@@ -262,6 +272,22 @@ public class InvoiceManager implements InvoiceService{
 		}else if(pageSize <= 0) {
 			
 			throw new BusinessException(Messages.PAGESIZECANNOTLESSTHANZERO);
+		}
+	}
+	
+	private void checkRentalExists(int rentalId) {
+		
+		if(!this.rentalService.getById(rentalId).isSuccess()) {
+			
+			throw new BusinessException(Messages.RENTALNOTFOUND);
+		}
+	}
+	
+	private void checkPaymentExists(int paymentId) {
+		
+		if(!this.paymentService.getByPaymentId(paymentId).isSuccess()) {
+			
+			throw new BusinessException(Messages.PAYMENTNOTFOUND);
 		}
 	}
 }
