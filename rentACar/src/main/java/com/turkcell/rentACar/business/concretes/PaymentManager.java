@@ -32,7 +32,6 @@ import com.turkcell.rentACar.core.utilities.results.SuccessResult;
 import com.turkcell.rentACar.dataAccess.abstracts.PaymentDao;
 import com.turkcell.rentACar.entities.concretes.CreditCard;
 import com.turkcell.rentACar.entities.concretes.Payment;
-import com.turkcell.rentACar.entities.concretes.Rental;
 
 @Service
 public class PaymentManager implements PaymentService{

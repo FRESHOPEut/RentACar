@@ -1,7 +1,6 @@
 package com.turkcell.rentACar.business.concretes;
 
 import java.time.LocalDate;
-import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -24,7 +23,6 @@ import com.turkcell.rentACar.business.dtos.additionalService.AdditionalServiceId
 import com.turkcell.rentACar.business.dtos.car.CarDto;
 import com.turkcell.rentACar.business.dtos.rental.ListRentalDto;
 import com.turkcell.rentACar.business.dtos.rental.RentalDto;
-import com.turkcell.rentACar.business.requests.create.CreateDelayedDeliveryRequest;
 import com.turkcell.rentACar.business.requests.create.CreateRentalRequest;
 import com.turkcell.rentACar.business.requests.update.UpdateCarRequest;
 import com.turkcell.rentACar.business.requests.update.UpdateRentalRequest;
@@ -74,10 +72,8 @@ public class RentalManager implements RentalService {
 		checkAdditionalServiceExists(updateRentalRequest.getAdditionalServicesIds());
 		
 		RentalDto rentalDto = getById(updateRentalRequest.getRentalId()).getData();
-		Rental rental = this.modelMapperService.forDto().map(updateRentalRequest, Rental.class);
-		delayedDelivery(updateRentalRequest, rental, rentalDto);
-		calculateTotalDailyPrice(rental.getRentalId());
-		updateCarKilometer(updateRentalRequest);
+		Rental rental = this.modelMapperService.forRequest().map(updateRentalRequest, Rental.class);
+		rental = delayedDelivery(updateRentalRequest, rental, rentalDto);
 		this.rentalDao.save(rental);
 		
 		return new SuccessDataResult<UpdateRentalRequest>(updateRentalRequest,
@@ -228,20 +224,22 @@ public class RentalManager implements RentalService {
 		}
 	}
 	
-	private void delayedDelivery(UpdateRentalRequest updateRentalRequest, Rental rental, RentalDto rentalDto) {
+	private Rental delayedDelivery(UpdateRentalRequest updateRentalRequest, Rental rental, RentalDto rentalDto) {
 		
-		if(rentalDto.getReturnDate() == updateRentalRequest.getReturnDate()) {
+		if(rentalDto.getReturnDate().equals(updateRentalRequest.getReturnDate())) {
 			
 			rental.setRentalTotalDailyPrice(rentalDto.getTotalDailyPrice());
 			rental.setRentedKilometer(this.rentalDao.getById(updateRentalRequest.getRentalId()).getRentedKilometer());
 			rental.setRentalCustomer(this.customerService.setByCustomerId(updateRentalRequest.getCustomerId()));
 			rental.setRentalDate(rentalDto.getRentalDate());
+			
+			rental.setRentalTotalDailyPrice(calculateTotalDailyPrice(updateRentalRequest.getRentalId()));
+			updateCarKilometer(updateRentalRequest);
 		}
 		
-		if(rentalDto.getReturnDate() != updateRentalRequest.getReturnDate()) {
+		if(!rentalDto.getReturnDate().equals(updateRentalRequest.getReturnDate())) {
 			
-			double totalPrice = totalPriceCalculator(rental, calculateExpiredDate(rentalDto.getRentalDate(),
-					updateRentalRequest.getReturnDate()));
+			double totalPrice = calculateTotalDailyPrice(updateRentalRequest.getRentalId());
 			
 			CreateRentalRequest newRental = new CreateRentalRequest(updateRentalRequest.getCarId(),
 					updateRentalRequest.getCustomerId(), updateRentalRequest.getReturnDate(),
@@ -250,18 +248,8 @@ public class RentalManager implements RentalService {
 			
 			create(newRental);
 		}
-	}
-	
-	private int calculateExpiredDate(LocalDate deliveryDate, LocalDate deliveredDate) {
 		
-		return Integer.valueOf((int) ChronoUnit.DAYS.between(deliveryDate, deliveredDate));
-	}
-	
-	private double totalPriceCalculator(Rental rental, int passedDays) {
-		
-		double totalPrice = rental.getRentalTotalDailyPrice() * passedDays;
-		
-		return totalPrice;
+		return rental;
 	}
 	
 	private void checkPageNoAndPageSize(int pageNo, int pageSize) {
