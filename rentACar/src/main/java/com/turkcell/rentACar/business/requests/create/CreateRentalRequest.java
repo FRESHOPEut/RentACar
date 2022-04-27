@@ -25,6 +25,9 @@ public class CreateRentalRequest {
 	@NotNull
 	private int customerId;
 	
+	@JsonIgnore
+	private LocalDate rentalDate;
+	
 	@NotNull
 	private LocalDate returnDate;
 	

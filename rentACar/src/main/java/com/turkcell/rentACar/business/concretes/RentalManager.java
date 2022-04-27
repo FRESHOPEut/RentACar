@@ -73,12 +73,13 @@ public class RentalManager implements RentalService {
 		
 		RentalDto rentalDto = getById(updateRentalRequest.getRentalId()).getData();
 		Rental rental = this.modelMapperService.forRequest().map(updateRentalRequest, Rental.class);
-		rental = delayedDelivery(updateRentalRequest, rental, rentalDto);
-		this.rentalDao.save(rental);
+		delayedDelivery(updateRentalRequest, rental, rentalDto);
+		updateCarKilometer(updateRentalRequest);
 		
 		return new SuccessDataResult<UpdateRentalRequest>(updateRentalRequest,
-			Messages.RENTALUPDATED + Integer.toString(rental.getRentalId()) + Messages.AND
-			+ Messages.RENTALTOTALPRICE + Double.toString(rental.getRentalTotalDailyPrice()));
+			Messages.RENTALUPDATED + Integer.toString(updateRentalRequest.getRentalId()) + Messages.AND
+			+ Messages.RENTALTOTALPRICE + Double.toString(getById(updateRentalRequest.getRentalId())
+			.getData().getTotalDailyPrice()));
 	}
 
 	@Override
@@ -97,7 +98,7 @@ public class RentalManager implements RentalService {
 		CarDto carDto = this.carService.getById(createRentalRequest.getCarId()).getData();
 		rental.setRentalCustomer(this.customerService.setByCustomerId(createRentalRequest.getCustomerId()));
 		rental.setRentalDate(date);
-		rental.setRentedKilometer(carDto.getKilometerOfCar());;
+		rental.setRentedKilometer(carDto.getKilometerOfCar());
 		this.rentalDao.save(rental);
 
 		rental.setRentalTotalDailyPrice(calculateTotalDailyPrice(rental.getRentalId()));
@@ -224,7 +225,7 @@ public class RentalManager implements RentalService {
 		}
 	}
 	
-	private Rental delayedDelivery(UpdateRentalRequest updateRentalRequest, Rental rental, RentalDto rentalDto) {
+	private void delayedDelivery(UpdateRentalRequest updateRentalRequest, Rental rental, RentalDto rentalDto) {
 		
 		if(rentalDto.getReturnDate().equals(updateRentalRequest.getReturnDate())) {
 			
@@ -232,24 +233,29 @@ public class RentalManager implements RentalService {
 			rental.setRentedKilometer(this.rentalDao.getById(updateRentalRequest.getRentalId()).getRentedKilometer());
 			rental.setRentalCustomer(this.customerService.setByCustomerId(updateRentalRequest.getCustomerId()));
 			rental.setRentalDate(rentalDto.getRentalDate());
-			
 			rental.setRentalTotalDailyPrice(calculateTotalDailyPrice(updateRentalRequest.getRentalId()));
 			updateCarKilometer(updateRentalRequest);
+			this.rentalDao.save(rental);
 		}
 		
 		if(!rentalDto.getReturnDate().equals(updateRentalRequest.getReturnDate())) {
 			
 			double totalPrice = calculateTotalDailyPrice(updateRentalRequest.getRentalId());
+			CreateRentalRequest newRentalRequest = new CreateRentalRequest(updateRentalRequest.getCarId(),
+					updateRentalRequest.getCustomerId(), rentalDto.getReturnDate(),
+					updateRentalRequest.getReturnDate(), updateRentalRequest.getCurrentCityPlate(),
+					updateRentalRequest.getReturnCityPlate(), updateRentalRequest.getAdditionalServicesIds(),
+					totalPrice);
 			
-			CreateRentalRequest newRental = new CreateRentalRequest(updateRentalRequest.getCarId(),
-					updateRentalRequest.getCustomerId(), updateRentalRequest.getReturnDate(),
-					updateRentalRequest.getCurrentCityPlate(), updateRentalRequest.getReturnCityPlate(),
-					updateRentalRequest.getAdditionalServicesIds(), totalPrice);
-			
-			create(newRental);
+			Rental newRental = this.modelMapperService.forRequest().map(newRentalRequest, Rental.class);
+			CarDto carDto = this.carService.getById(newRentalRequest.getCarId()).getData();
+			newRental.setRentalCustomer(this.customerService.setByCustomerId(newRentalRequest.getCustomerId()));
+			newRental.setRentedKilometer(carDto.getKilometerOfCar());
+			newRental.setReturnKilometer(updateRentalRequest.getReturnKilometer());
+			this.rentalDao.save(newRental);
+			newRental.setRentalTotalDailyPrice(calculateTotalDailyPrice(newRental.getRentalId()));
+			this.rentalDao.save(newRental);
 		}
-		
-		return rental;
 	}
 	
 	private void checkPageNoAndPageSize(int pageNo, int pageSize) {
